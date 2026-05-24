@@ -1,0 +1,178 @@
+.welcome {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1.25rem 2rem;
+  overflow: hidden;
+}
+
+.welcome__bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(82, 183, 136, 0.35), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(64, 145, 108, 0.2), transparent),
+    linear-gradient(165deg, #f0f7f4 0%, #e8f5e9 45%, #d8efe3 100%);
+  z-index: 0;
+}
+
+.welcome__bg::after {
+  content: '';
+  position: absolute;
+  bottom: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  height: 40%;
+  background: radial-gradient(ellipse, rgba(45, 106, 79, 0.08), transparent 70%);
+}
+
+.welcome__content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.welcome__app-icon {
+  width: 112px;
+  height: 112px;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 10px 28px rgba(45, 106, 79, 0.22));
+}
+
+.welcome__app-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.welcome__title {
+  margin: 0 0 0.5rem;
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #1b4332;
+}
+
+.welcome__tagline {
+  margin: 0 0 2.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #52796f;
+}
+
+.welcome__tagline strong {
+  color: #2d6a4f;
+  font-weight: 700;
+}
+
+.welcome__auth {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.welcome__auth-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #52796f;
+  text-align: left;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  height: 52px;
+  padding: 0 1.25rem;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.social-btn:active {
+  transform: scale(0.98);
+}
+
+.social-btn__icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.social-btn__icon--kakao {
+  color: #191919;
+}
+
+.social-btn--google {
+  background: #ffffff;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.social-btn--google:hover {
+  background: #f8f9fa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.social-btn--kakao {
+  background: #fee500;
+  color: rgba(0, 0, 0, 0.85);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.social-btn--kakao:hover {
+  background: #f5dc00;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.welcome__terms {
+  margin: 1.5rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #84a98c;
+}
+
+.welcome__link {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: #40916c;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.welcome__link:hover {
+  color: #2d6a4f;
+}
+
+@media (min-width: 480px) {
+  .welcome__title {
+    font-size: 2.5rem;
+  }
+
+  .welcome__app-icon {
+    width: 128px;
+    height: 128px;
+  }
+}
