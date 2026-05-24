@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { signInWithProvider } from '../lib/auth';
 import './WelcomeScreen.css';
 
 function GoogleIcon() {
@@ -85,23 +87,21 @@ function VillagerAppIcon() {
   );
 }
 
-function WelcomeScreen({ onGoogleLogin, onKakaoLogin }) {
-  const handleGoogle = () => {
-    if (onGoogleLogin) {
-      onGoogleLogin();
-      return;
-    }
-    // OAuth 연동 시 Google 로그인 플로우로 교체
-    console.log('[Villager] Google 로그인');
-  };
+function WelcomeScreen() {
+  const [loadingProvider, setLoadingProvider] = useState(null);
+  const [authError, setAuthError] = useState(null);
 
-  const handleKakao = () => {
-    if (onKakaoLogin) {
-      onKakaoLogin();
-      return;
+  const handleOAuth = async (provider) => {
+    setAuthError(null);
+    setLoadingProvider(provider);
+    try {
+      await signInWithProvider(provider);
+      // 성공 시 카카오/Google 로그인 페이지로 이동 후 다시 앱으로 돌아옴
+    } catch (err) {
+      const label = provider === 'kakao' ? '카카오' : 'Google';
+      setAuthError(err.message || `${label} 로그인에 실패했습니다.`);
+      setLoadingProvider(null);
     }
-    // OAuth 연동 시 Kakao 로그인 플로우로 교체
-    console.log('[Villager] Kakao 로그인');
   };
 
   return (
@@ -119,24 +119,35 @@ function WelcomeScreen({ onGoogleLogin, onKakaoLogin }) {
         </p>
 
         <div className="welcome__auth">
-          <p className="welcome__auth-label">시작하기</p>
+
+          {authError && (
+            <p className="welcome__auth-error" role="alert">
+              {authError}
+            </p>
+          )}
 
           <button
             type="button"
             className="social-btn social-btn--google"
-            onClick={handleGoogle}
+            onClick={() => handleOAuth('google')}
+            disabled={!!loadingProvider}
           >
             <GoogleIcon />
-            <span>Google로 계속하기</span>
+            <span>
+              {loadingProvider === 'google' ? '연결 중…' : 'Google로 계속하기'}
+            </span>
           </button>
 
           <button
             type="button"
             className="social-btn social-btn--kakao"
-            onClick={handleKakao}
+            onClick={() => handleOAuth('kakao')}
+            disabled={!!loadingProvider}
           >
             <KakaoIcon />
-            <span>카카오로 계속하기</span>
+            <span>
+              {loadingProvider === 'kakao' ? '연결 중…' : '카카오로 계속하기'}
+            </span>
           </button>
         </div>
 

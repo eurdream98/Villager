@@ -1,3 +1,12 @@
 .App {
   min-height: 100dvh;
 }
+
+.App--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  color: #52796f;
+  font-size: 0.95rem;
+}

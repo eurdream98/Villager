@@ -88,6 +88,18 @@
   text-align: left;
 }
 
+.welcome__auth-error {
+  margin: 0 0 0.5rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #9b2226;
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  text-align: left;
+}
+
 .social-btn {
   display: flex;
   align-items: center;
@@ -105,8 +117,13 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
 }
 
-.social-btn:active {
+.social-btn:active:not(:disabled) {
   transform: scale(0.98);
+}
+
+.social-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .social-btn__icon {
