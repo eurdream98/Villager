@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { signInWithProvider } from '../lib/auth';
+import { isGoogleOAuthBlockedBrowser, isKakaoTalkInApp } from '../lib/browser';
+import GoogleInAppNotice from './GoogleInAppNotice';
 import './WelcomeScreen.css';
 
 function GoogleIcon() {
@@ -90,9 +92,17 @@ function VillagerAppIcon() {
 function WelcomeScreen() {
   const [loadingProvider, setLoadingProvider] = useState(null);
   const [authError, setAuthError] = useState(null);
+  const [showGoogleInAppNotice, setShowGoogleInAppNotice] = useState(false);
+  const googleBlockedInApp = isGoogleOAuthBlockedBrowser();
 
   const handleOAuth = async (provider) => {
     setAuthError(null);
+
+    if (provider === 'google' && googleBlockedInApp) {
+      setShowGoogleInAppNotice(true);
+      return;
+    }
+
     setLoadingProvider(provider);
     try {
       await signInWithProvider(provider);
@@ -106,6 +116,9 @@ function WelcomeScreen() {
 
   return (
     <div className="welcome">
+      {showGoogleInAppNotice && (
+        <GoogleInAppNotice onClose={() => setShowGoogleInAppNotice(false)} />
+      )}
       <div className="welcome__bg" aria-hidden="true" />
 
       <main className="welcome__content">
@@ -123,6 +136,13 @@ function WelcomeScreen() {
           {authError && (
             <p className="welcome__auth-error" role="alert">
               {authError}
+            </p>
+          )}
+
+          {googleBlockedInApp && isKakaoTalkInApp() && (
+            <p className="welcome__inapp-hint">
+              카카오톡에서는 Google 로그인이 제한됩니다. Safari·Chrome에서 열거나 카카오
+              로그인을 이용해 주세요.
             </p>
           )}
 

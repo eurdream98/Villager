@@ -88,6 +88,18 @@
   text-align: left;
 }
 
+.welcome__inapp-hint {
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #52796f;
+  background: rgba(255, 248, 220, 0.9);
+  border: 1px solid #f0e6b8;
+  border-radius: 8px;
+  text-align: left;
+}
+
 .welcome__auth-error {
   margin: 0 0 0.5rem;
   padding: 0.6rem 0.75rem;
