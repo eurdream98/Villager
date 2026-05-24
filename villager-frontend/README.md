@@ -36,3 +36,16 @@ docker run -p 8080:80 villager-frontend
 ```
 
 http://localhost:8080
+
+## Vercel 배포
+
+**방법 A (권장):** Vercel 프로젝트 → Settings → General → **Root Directory** = `villager-frontend`
+
+**방법 B:** Root Directory 비워 두면 저장소 루트의 `vercel.json`이 빌드 경로를 지정합니다.
+
+Environment Variables (필수):
+
+- `REACT_APP_SUPABASE_URL`
+- `REACT_APP_SUPABASE_ANON_KEY`
+
+Supabase Redirect URLs에 Vercel 도메인 추가 (예: `https://your-app.vercel.app`)

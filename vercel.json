@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd villager-frontend && npm install && npm run build",
+  "outputDirectory": "villager-frontend/build",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
