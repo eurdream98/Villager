@@ -1,0 +1,73 @@
+.member-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.member-badge__avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(45, 106, 79, 0.18);
+}
+
+.member-badge__avatar--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2d6a4f;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.member-badge__info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  text-align: left;
+}
+
+.member-badge__name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1b4332;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.member-badge__provider {
+  font-size: 0.7rem;
+  color: #84a98c;
+  white-space: nowrap;
+}
+
+.member-badge__skeleton {
+  display: block;
+  width: 120px;
+  height: 36px;
+  border-radius: 18px;
+  background: linear-gradient(
+    90deg,
+    rgba(45, 106, 79, 0.08) 25%,
+    rgba(45, 106, 79, 0.14) 50%,
+    rgba(45, 106, 79, 0.08) 75%
+  );
+  background-size: 200% 100%;
+  animation: member-badge-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes member-badge-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}

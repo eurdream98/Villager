@@ -48,4 +48,34 @@ Environment Variables (필수):
 - `REACT_APP_SUPABASE_URL`
 - `REACT_APP_SUPABASE_ANON_KEY`
 
-Supabase Redirect URLs에 Vercel 도메인 추가 (예: `https://your-app.vercel.app`)
+Supabase **Authentication → URL Configuration**:
+
+| 항목 | 값 (예시) |
+|------|-----------|
+| Site URL | `https://villager-mauve.vercel.app` |
+| Redirect URLs | `https://villager-mauve.vercel.app/`, `http://localhost:3000/`, `http://localhost:3001/`, `http://127.0.0.1:3000/` |
+
+로컬 `.env`에는 `REACT_APP_AUTH_REDIRECT_URL`을 **넣지 않습니다** (개발 시 자동으로 `http://localhost:포트/` 사용).
+
+Vercel Environment Variables (배포만):
+
+- `REACT_APP_AUTH_REDIRECT_URL` = `https://villager-mauve.vercel.app/`
+
+`bad_oauth_state` 오류는 보통 인앱 브라우저(카카오톡 등)에서 localStorage가 끊기거나 Redirect URL 불일치일 때 납니다.
+
+## 실시간 채팅 (Socket.IO)
+
+거래 상품 상세 → **채팅하기** 에서 WebSocket 기반 채팅을 사용합니다.
+
+```bash
+# 터미널 1 — 채팅 서버 (포트 3001)
+cd villager-frontend/server
+npm install
+npm start
+
+# 터미널 2 — 프론트 (.env 에 추가)
+# REACT_APP_CHAT_WS_URL=http://127.0.0.1:3001
+npm start
+```
+
+`REACT_APP_CHAT_WS_URL` 이 없으면 같은 브라우저 내 **BroadcastChannel** 폴백으로 동작합니다(개발·데모용).

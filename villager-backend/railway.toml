@@ -1,0 +1,10 @@
+# Railway: Root Directory = villager-backend 로 서비스 생성 시 사용
+[build]
+builder = "NIXPACKS"
+buildCommand = "./mvnw -q -DskipTests package"
+
+[deploy]
+startCommand = "java -Dserver.port=$PORT -jar target/villager-backend-0.1.0.jar"
+healthcheckPath = "/api/v1/health"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"

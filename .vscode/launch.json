@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Villager Backend (local)",
+      "request": "launch",
+      "mainClass": "app.villager.VillagerBackendApplication",
+      "projectName": "villager-backend",
+      "cwd": "${workspaceFolder}/villager-backend",
+      "vmArgs": "-Dspring.profiles.active=local -Dserver.port=8080",
+      "env": {
+        "HOST": "",
+        "PORT": "",
+        "SERVER_PORT": "",
+        "SERVER_ADDRESS": ""
+      }
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+.member-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  max-width: min(58vw, 220px);
+}
+
+.member-panel__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.member-panel__btn {
+  padding: 0.4rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.member-panel__btn--growth {
+  background: rgba(45, 106, 79, 0.1);
+  border-color: rgba(45, 106, 79, 0.22);
+  color: #2d6a4f;
+}
+
+.member-panel__btn--growth:hover {
+  background: rgba(45, 106, 79, 0.16);
+}
+
+.member-panel__btn--logout {
+  background: transparent;
+  border-color: rgba(45, 106, 79, 0.18);
+  color: #52796f;
+}
+
+.member-panel__btn--logout:hover:not(:disabled) {
+  background: rgba(45, 106, 79, 0.06);
+}
+
+.member-panel__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

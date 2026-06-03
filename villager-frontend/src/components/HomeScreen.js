@@ -1,47 +1,94 @@
+import { useState } from 'react';
 import { signOut } from '../lib/auth';
-import {
-  getAuthProvider,
-  getAvatarUrl,
-  getDisplayName,
-  getProviderLabel,
-} from '../lib/user';
+import GrowthContributionScreen from './growth/GrowthContributionScreen';
+import NeighborhoodTreeMapScreen from './growth/NeighborhoodTreeMapScreen';
+import { useGrowthStats } from '../hooks/useGrowthStats';
+import { useMemberProfile } from '../hooks/useMemberProfile';
+import BottomTabBar from './main/BottomTabBar';
+import ChatPage from './main/ChatPage';
+import CommunityPage from './main/CommunityPage';
+import JobsPage from './main/JobsPage';
+import MemberPanel from './main/MemberPanel';
+import TradePage from './main/TradePage';
 import './HomeScreen.css';
 
 function HomeScreen({ user }) {
-  const handleSignOut = async () => {
+  const [activeTab, setActiveTab] = useState('trade');
+  const [overlay, setOverlay] = useState(null);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
+  const { member, loading: profileLoading } = useMemberProfile(user);
+  const {
+    personal,
+    neighborhoodTrees,
+    loading: growthLoading,
+    error: growthError,
+  } = useGrowthStats(user?.id);
+
+  const renderTabPage = () => {
+    if (activeTab === 'trade') {
+      return <TradePage user={user} member={member} />;
+    }
+    if (activeTab === 'chat') return <ChatPage user={user} />;
+    if (activeTab === 'community') return <CommunityPage />;
+    if (activeTab === 'jobs') return <JobsPage />;
+    return <TradePage user={user} member={member} />;
+  };
+
+  const handleLogout = async () => {
+    setLogoutLoading(true);
     try {
       await signOut();
     } catch (err) {
       console.error('[Villager] 로그아웃 실패', err);
+      setLogoutLoading(false);
     }
   };
 
-  const displayName = getDisplayName(user);
-  const provider = getAuthProvider(user);
-  const providerLabel = getProviderLabel(provider);
-  const avatarUrl = getAvatarUrl(user);
+  const openGrowth = () => setOverlay('growth');
+  const openTreeMap = () => setOverlay('treeMap');
+  const closeGrowth = () => setOverlay(null);
+  const closeTreeMap = () => setOverlay('growth');
 
   return (
     <div className="home">
-      <main className="home__content">
-        {avatarUrl && (
-          <img
-            className="home__avatar"
-            src={avatarUrl}
-            alt=""
-            width={64}
-            height={64}
-          />
-        )}
-        <p className="home__greeting">안녕하세요, {displayName}님</p>
-        {providerLabel && (
-          <p className="home__provider">{providerLabel} 계정으로 로그인됨</p>
-        )}
-        <p className="home__hint">로그인에 성공했습니다. 다음 화면은 준비 중입니다.</p>
-        <button type="button" className="home__logout" onClick={handleSignOut}>
-          로그아웃
-        </button>
+      <header className="home__header">
+        <h1 className="home__brand">Villager</h1>
+        <MemberPanel
+          member={member}
+          loading={profileLoading}
+          onViewGrowth={openGrowth}
+          onLogout={handleLogout}
+          logoutLoading={logoutLoading}
+        />
+      </header>
+
+      <main className="home__main" hidden={overlay !== null}>
+        {renderTabPage()}
       </main>
+
+      {overlay === null && (
+        <BottomTabBar activeTab={activeTab} onTabChange={setActiveTab} />
+      )}
+
+      {overlay === 'growth' && (
+        <GrowthContributionScreen
+          member={member}
+          personal={personal}
+          loading={growthLoading}
+          error={growthError}
+          onClose={closeGrowth}
+          onOpenTreeMap={openTreeMap}
+        />
+      )}
+
+      {overlay === 'treeMap' && (
+        <NeighborhoodTreeMapScreen
+          neighborhoodTrees={neighborhoodTrees}
+          loading={growthLoading}
+          onClose={closeTreeMap}
+        />
+      )}
     </div>
   );
 }

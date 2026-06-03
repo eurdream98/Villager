@@ -1,0 +1,29 @@
+.tab-page {
+  padding: 1.25rem 1rem 1.5rem;
+}
+
+.tab-page__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1b4332;
+  letter-spacing: -0.02em;
+}
+
+.tab-page__desc {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #52796f;
+}
+
+.tab-page__card {
+  margin-top: 1.25rem;
+  padding: 1.25rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(45, 106, 79, 0.1);
+  color: #52796f;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}

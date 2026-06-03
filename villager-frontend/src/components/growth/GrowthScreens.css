@@ -1,0 +1,325 @@
+.growth-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(165deg, #f0f7f4 0%, #e8f5e9 45%, #d8efe3 100%);
+}
+
+.growth-screen__header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: calc(0.65rem + env(safe-area-inset-top, 0)) 0.75rem 0.65rem;
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(45, 106, 79, 0.1);
+}
+
+.growth-screen__back {
+  padding: 0.35rem 0.5rem;
+  border: none;
+  background: transparent;
+  color: #2d6a4f;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.growth-screen__title {
+  margin: 0;
+  flex: 1;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1b4332;
+}
+
+.growth-screen__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.growth-card {
+  padding: 1.15rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(45, 106, 79, 0.1);
+  margin-bottom: 0.85rem;
+}
+
+.growth-card__label {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #84a98c;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.growth-card__value {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1b4332;
+}
+
+.growth-card__sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #52796f;
+}
+
+.growth-xp-bar {
+  margin-top: 0.85rem;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(45, 106, 79, 0.12);
+  overflow: hidden;
+}
+
+.growth-xp-bar__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #40916c, #52b788);
+  transition: width 0.35s ease;
+}
+
+.growth-xp-bar__text {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: #52796f;
+}
+
+.growth-activity-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.growth-activity-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(45, 106, 79, 0.08);
+}
+
+.growth-activity-list__item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.growth-activity-list__label {
+  font-size: 0.9rem;
+  color: #1b4332;
+}
+
+.growth-activity-list__meta {
+  font-size: 0.75rem;
+  color: #84a98c;
+}
+
+.growth-activity-list__xp {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #2d6a4f;
+}
+
+.growth-screen__cta {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.85rem 1rem;
+  border: none;
+  border-radius: 12px;
+  background: #2d6a4f;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.growth-screen__cta:hover {
+  background: #1b4332;
+}
+
+.growth-screen__hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #84a98c;
+  text-align: center;
+}
+
+.growth-screen__loading {
+  padding: 2rem;
+  text-align: center;
+  color: #52796f;
+}
+
+/* —— 동네 나무 지도 —— */
+
+.tree-map {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-height: min(70vh, 520px);
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(45, 106, 79, 0.15);
+  background:
+    linear-gradient(180deg, rgba(135, 206, 235, 0.35) 0%, transparent 28%),
+    linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 40%, #81c784 100%);
+  box-shadow: inset 0 0 40px rgba(45, 106, 79, 0.08);
+}
+
+.tree-map__grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.tree-map__roads {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.tree-map__road {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 2px;
+}
+
+.tree-map__road--h1 {
+  top: 35%;
+  left: 5%;
+  width: 90%;
+  height: 6px;
+}
+
+.tree-map__road--h2 {
+  top: 58%;
+  left: 10%;
+  width: 75%;
+  height: 5px;
+}
+
+.tree-map__road--v1 {
+  top: 10%;
+  left: 48%;
+  width: 5px;
+  height: 80%;
+}
+
+.tree-map__road--v2 {
+  top: 15%;
+  left: 28%;
+  width: 4px;
+  height: 70%;
+}
+
+.tree-map__marker {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.tree-map__marker:focus-visible {
+  outline: 2px solid #2d6a4f;
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.tree-map__marker-label {
+  margin-top: 0.15rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #1b4332;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(27, 67, 50, 0.12);
+}
+
+.tree-map__marker--selected .tree-map__marker-label {
+  background: #2d6a4f;
+  color: #fff;
+}
+
+.tree-map-detail {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(45, 106, 79, 0.12);
+}
+
+.tree-map-detail__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1b4332;
+}
+
+.tree-map-detail__stage {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: #40916c;
+  font-weight: 600;
+}
+
+.tree-map-detail__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.tree-map-detail__stat dt {
+  font-size: 0.7rem;
+  color: #84a98c;
+  margin: 0;
+}
+
+.tree-map-detail__stat dd {
+  margin: 0.1rem 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1b4332;
+}
+
+.tree-map-detail__hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #52796f;
+}
+
+.tree-map-detail--empty {
+  text-align: center;
+  color: #84a98c;
+  font-size: 0.9rem;
+}

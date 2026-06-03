@@ -89,14 +89,16 @@ function VillagerAppIcon() {
   );
 }
 
-function WelcomeScreen() {
+function WelcomeScreen({ oauthError, onClearOAuthError }) {
   const [loadingProvider, setLoadingProvider] = useState(null);
   const [authError, setAuthError] = useState(null);
   const [showGoogleInAppNotice, setShowGoogleInAppNotice] = useState(false);
   const googleBlockedInApp = isGoogleOAuthBlockedBrowser();
+  const displayError = authError || oauthError;
 
   const handleOAuth = async (provider) => {
     setAuthError(null);
+    onClearOAuthError?.();
 
     if (provider === 'google' && googleBlockedInApp) {
       setShowGoogleInAppNotice(true);
@@ -133,16 +135,24 @@ function WelcomeScreen() {
 
         <div className="welcome__auth">
 
-          {authError && (
+          {displayError && (
             <p className="welcome__auth-error" role="alert">
-              {authError}
+              {displayError}
             </p>
           )}
 
-          {googleBlockedInApp && isKakaoTalkInApp() && (
+          {(googleBlockedInApp || isKakaoTalkInApp()) && (
             <p className="welcome__inapp-hint">
-              카카오톡에서는 Google 로그인이 제한됩니다. Safari·Chrome에서 열거나 카카오
-              로그인을 이용해 주세요.
+              {isKakaoTalkInApp()
+                ? '카카오톡 인앱에서는 로그인이 자주 실패합니다. ⋯ 메뉴 → Safari/Chrome에서 열기 후 다시 로그인해 주세요.'
+                : '인앱 브라우저에서는 로그인이 불안정할 수 있습니다. Safari·Chrome을 이용해 주세요.'}
+            </p>
+          )}
+
+          {googleBlockedInApp && !isKakaoTalkInApp() && (
+            <p className="welcome__inapp-hint">
+              이 브라우저에서는 Google 로그인이 제한될 수 있습니다. Safari·Chrome을 이용해
+              주세요.
             </p>
           )}
 

@@ -1,0 +1,20 @@
+# Copy to application-local.yml (gitignored) and fill in Supabase values.
+# Run: .\run-local.ps1  (또는 npm 과 다른 터미널에서 mvnw 실행)
+
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://db.YOUR_PROJECT_REF.supabase.co:5432/postgres?sslmode=require
+    username: postgres
+    password: YOUR_DB_PASSWORD
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://YOUR_PROJECT_REF.supabase.co/auth/v1
+
+villager:
+  cors:
+    allowed-origins: http://localhost:3000,http://localhost:3001

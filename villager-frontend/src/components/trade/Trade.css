@@ -1,0 +1,1149 @@
+/* —— 거래 탭 피드 —— */
+
+.trade-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-bottom: 4.5rem;
+}
+
+.trade-page__header {
+  flex-shrink: 0;
+  padding: 1rem 1rem 0.5rem;
+}
+
+.trade-page__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1b4332;
+}
+
+.trade-page__desc {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #52796f;
+}
+
+.trade-page__error {
+  margin: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #fff5f5;
+  border: 1px solid #f5c2c2;
+  color: #9b2226;
+  font-size: 0.9rem;
+}
+
+.trade-page__error p {
+  margin: 0 0 0.5rem;
+}
+
+.trade-page__retry {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid #9b2226;
+  border-radius: 6px;
+  background: #fff;
+  color: #9b2226;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.trade-feed {
+  flex: 1;
+  margin: 0;
+  padding: 0.5rem 1rem 1rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.trade-feed__empty,
+.trade-feed__loading {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #84a98c;
+  font-size: 0.9rem;
+}
+
+.trade-fab {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(4.25rem + env(safe-area-inset-bottom, 0));
+  z-index: 20;
+  padding: 0.85rem 1.25rem;
+  border: none;
+  border-radius: 999px;
+  background: #2d6a4f;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(45, 106, 79, 0.35);
+}
+
+.trade-fab:hover {
+  background: #1b4332;
+}
+
+/* —— 카드 —— */
+
+.trade-card__inner {
+  display: flex;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.85rem;
+  border: 1px solid rgba(45, 106, 79, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.trade-card__inner:hover {
+  border-color: rgba(45, 106, 79, 0.22);
+}
+
+.trade-card__thumb {
+  position: relative;
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #e8f5e9;
+}
+
+.trade-card__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trade-card__thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 0.7rem;
+  color: #84a98c;
+}
+
+.trade-card__badges {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  max-width: calc(100% - 12px);
+}
+
+.trade-card__badge {
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.trade-card__badge--free {
+  background: #40916c;
+}
+
+.trade-card__badge--apt-pending {
+  background: #e9c46a;
+  color: #1b4332;
+}
+
+.trade-card__badge--apt-done {
+  background: #2d6a4f;
+}
+
+.trade-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.trade-card__title {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1b4332;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.trade-card__price {
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #2d6a4f;
+}
+
+.trade-card__meta {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  color: #84a98c;
+}
+
+.trade-card__methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trade-card__methods li {
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background: rgba(45, 106, 79, 0.08);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #52796f;
+}
+
+/* —— 판매 화면 —— */
+
+.trade-sell {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  background: #f0f7f4;
+}
+
+.trade-sell__header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: calc(0.65rem + env(safe-area-inset-top, 0)) 0.75rem 0.65rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(45, 106, 79, 0.1);
+}
+
+.trade-sell__back {
+  padding: 0.35rem 0.5rem;
+  border: none;
+  background: transparent;
+  color: #2d6a4f;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.trade-sell__title {
+  margin: 0;
+  flex: 1;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1b4332;
+}
+
+.trade-sell__form {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.trade-sell__section {
+  margin-bottom: 1.25rem;
+}
+
+.trade-sell__label {
+  display: block;
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1b4332;
+}
+
+.trade-sell__hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: #84a98c;
+  line-height: 1.4;
+}
+
+.trade-sell__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.trade-sell__input {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgba(45, 106, 79, 0.2);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 1rem;
+  background: #fff;
+  color: #1b4332;
+}
+
+.trade-sell__input:focus {
+  outline: 2px solid rgba(45, 106, 79, 0.35);
+  outline-offset: 1px;
+}
+
+.trade-sell__photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.trade-sell__photo {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.trade-sell__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trade-sell__photo-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.trade-sell__photo-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border: 2px dashed rgba(45, 106, 79, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #2d6a4f;
+}
+
+.trade-sell__photo-add input {
+  display: none;
+}
+
+.trade-sell__toggle {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  cursor: pointer;
+}
+
+.trade-sell__toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.trade-sell__toggle-ui {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: #d8e2dc;
+  transition: background 0.2s;
+}
+
+.trade-sell__toggle-ui::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.trade-sell__toggle input:checked + .trade-sell__toggle-ui {
+  background: #40916c;
+}
+
+.trade-sell__toggle input:checked + .trade-sell__toggle-ui::after {
+  transform: translateX(20px);
+}
+
+.trade-method-list {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.trade-method {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.85rem;
+  border: 2px solid rgba(45, 106, 79, 0.15);
+  border-radius: 12px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.trade-method--selected {
+  border-color: #2d6a4f;
+  background: rgba(45, 106, 79, 0.06);
+}
+
+.trade-method__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.trade-method__label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1b4332;
+}
+
+.trade-method__escrow-badge {
+  flex-shrink: 0;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.trade-method--escrow-full .trade-method__escrow-badge {
+  background: rgba(64, 145, 108, 0.2);
+  color: #1b4332;
+}
+
+.trade-method--escrow-partial .trade-method__escrow-badge {
+  background: rgba(244, 162, 97, 0.25);
+  color: #9c4a1a;
+}
+
+.trade-method__desc {
+  font-size: 0.8rem;
+  color: #52796f;
+}
+
+.trade-method__escrow-detail {
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: #84a98c;
+}
+
+.trade-sell__escrow-box {
+  margin-bottom: 1rem;
+  padding: 0.85rem;
+  border-radius: 10px;
+  background: rgba(64, 145, 108, 0.12);
+  border: 1px solid rgba(45, 106, 79, 0.15);
+}
+
+.trade-sell__escrow-box strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+  color: #1b4332;
+}
+
+.trade-sell__escrow-box p {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #52796f;
+}
+
+.trade-sell__error {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: #c1121f;
+}
+
+.trade-sell__submit {
+  width: 100%;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 12px;
+  background: #2d6a4f;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.trade-sell__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.trade-sell__submit:not(:disabled):hover {
+  background: #1b4332;
+}
+
+/* —— 상품 상세 —— */
+
+.trade-detail {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  background: #f0f7f4;
+}
+
+.trade-detail__apt-banner {
+  flex-shrink: 0;
+  margin: 0 1rem 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: rgba(64, 145, 108, 0.12);
+  border: 1px solid rgba(45, 106, 79, 0.2);
+}
+
+.trade-detail__apt-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #1b4332;
+  margin-bottom: 0.35rem;
+}
+
+.trade-detail__apt-text {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #52796f;
+  line-height: 1.45;
+}
+
+.trade-detail__apt-chat-link {
+  margin-top: 0.5rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #2d6a4f;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.trade-detail__header {
+  flex-shrink: 0;
+  padding: calc(0.5rem + env(safe-area-inset-top, 0)) 0.75rem 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(45, 106, 79, 0.1);
+}
+
+.trade-detail__back {
+  padding: 0.35rem 0.5rem;
+  border: none;
+  background: transparent;
+  color: #2d6a4f;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.trade-detail__body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 5rem;
+}
+
+.trade-detail__gallery {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.trade-detail__image {
+  flex-shrink: 0;
+  width: min(85vw, 320px);
+  height: min(85vw, 320px);
+  border-radius: 12px;
+  object-fit: cover;
+  scroll-snap-align: start;
+  background: #e8f5e9;
+}
+
+.trade-detail__image--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #84a98c;
+  font-size: 0.9rem;
+}
+
+.trade-detail__info {
+  padding: 0 1rem 1rem;
+}
+
+.trade-detail__price {
+  margin: 0 0 0.35rem;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #2d6a4f;
+}
+
+.trade-detail__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1b4332;
+  line-height: 1.35;
+}
+
+.trade-detail__meta {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  color: #84a98c;
+}
+
+.trade-detail__section {
+  margin-bottom: 1rem;
+}
+
+.trade-detail__section-title {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #52796f;
+}
+
+.trade-detail__desc {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #1b4332;
+}
+
+.trade-detail__methods {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.trade-detail__method {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(45, 106, 79, 0.1);
+}
+
+.trade-detail__method-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1b4332;
+}
+
+.trade-detail__method-escrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #40916c;
+}
+
+.trade-detail__footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(3.5rem + env(safe-area-inset-bottom, 0));
+  z-index: 46;
+  padding: 0.65rem 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(45, 106, 79, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+.trade-detail__chat-btn {
+  width: 100%;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 12px;
+  background: #2d6a4f;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.trade-detail__chat-btn:hover {
+  background: #1b4332;
+}
+
+.trade-detail__own-hint {
+  margin: 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #84a98c;
+}
+
+/* —— 채팅 —— */
+
+.trade-chat {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: flex;
+  flex-direction: column;
+  background: #f0f7f4;
+}
+
+.trade-chat__header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: calc(0.5rem + env(safe-area-inset-top, 0)) 0.75rem 0.5rem;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(45, 106, 79, 0.1);
+}
+
+.trade-chat__back {
+  flex-shrink: 0;
+  padding: 0.35rem 0.5rem;
+  border: none;
+  background: transparent;
+  color: #2d6a4f;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.trade-chat__header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.trade-chat__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1b4332;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trade-chat__peer {
+  margin: 0.1rem 0 0;
+  font-size: 0.72rem;
+  color: #84a98c;
+}
+
+.trade-chat__trade-banner {
+  flex-shrink: 0;
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid rgba(45, 106, 79, 0.1);
+}
+
+.trade-chat__trade-thumb {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #e8f5e9;
+}
+
+.trade-chat__trade-thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  color: #84a98c;
+}
+
+.trade-chat__trade-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.trade-chat__trade-role {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.12rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(45, 106, 79, 0.12);
+  color: #2d6a4f;
+  margin-bottom: 0.2rem;
+}
+
+.trade-chat__trade-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1b4332;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trade-chat__trade-price {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  color: #52796f;
+}
+
+.trade-chat__trade-peer {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: #2d6a4f;
+  font-weight: 600;
+}
+
+.trade-chat__status {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+}
+
+.trade-chat__status--connected {
+  background: rgba(64, 145, 108, 0.2);
+  color: #1b4332;
+}
+
+.trade-chat__status--connecting {
+  background: rgba(45, 106, 79, 0.1);
+  color: #52796f;
+}
+
+.trade-chat__status--disconnected,
+.trade-chat__status--error {
+  background: rgba(193, 18, 31, 0.1);
+  color: #c1121f;
+}
+
+.trade-chat__messages {
+  flex: 1;
+  overflow-y: auto;
+  margin: 0;
+  padding: 1rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.trade-chat__empty {
+  text-align: center;
+  color: #84a98c;
+  font-size: 0.9rem;
+  padding: 2rem 0;
+}
+
+.trade-chat__msg {
+  align-self: flex-start;
+  max-width: 82%;
+  padding: 0.6rem 0.85rem;
+  border-radius: 14px 14px 14px 4px;
+  background: #fff;
+  border: 1px solid rgba(45, 106, 79, 0.1);
+}
+
+.trade-chat__msg--mine {
+  align-self: flex-end;
+  border-radius: 14px 14px 4px 14px;
+  background: #d8efe3;
+  border-color: rgba(45, 106, 79, 0.15);
+}
+
+.trade-chat__msg-name {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #40916c;
+}
+
+.trade-chat__msg-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: #1b4332;
+  word-break: break-word;
+}
+
+.trade-chat__msg-time {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.65rem;
+  color: #84a98c;
+}
+
+.trade-chat__composer {
+  flex-shrink: 0;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem calc(0.65rem + env(safe-area-inset-bottom, 0));
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(45, 106, 79, 0.1);
+}
+
+.trade-chat__input {
+  flex: 1;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(45, 106, 79, 0.2);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: #fff;
+}
+
+.trade-chat__input:focus {
+  outline: 2px solid rgba(45, 106, 79, 0.3);
+  outline-offset: 1px;
+}
+
+.trade-chat__send {
+  flex-shrink: 0;
+  padding: 0.7rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: #2d6a4f;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.trade-chat__send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.trade-chat__msg--system {
+  align-self: center;
+  max-width: 92%;
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(64, 145, 108, 0.25);
+  border-radius: 12px;
+}
+
+.trade-chat__msg--system .trade-chat__msg-text {
+  white-space: pre-line;
+  font-size: 0.85rem;
+}
+
+.trade-detail__chat-hint {
+  margin: 0.5rem 0 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(45, 106, 79, 0.08);
+  font-size: 0.8rem;
+  color: #52796f;
+  line-height: 1.45;
+}
+
+/* —— 약속 잡기 —— */
+
+.trade-apt {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(45, 106, 79, 0.1);
+}
+
+.trade-apt--confirmed {
+  background: rgba(64, 145, 108, 0.12);
+}
+
+.trade-apt--pending {
+  background: rgba(244, 162, 97, 0.12);
+}
+
+.trade-apt__toggle {
+  width: 100%;
+  padding: 0.5rem;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #2d6a4f;
+  cursor: pointer;
+  text-align: left;
+}
+
+.trade-apt__form {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.trade-apt__fieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.trade-apt__legend {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #52796f;
+  margin-bottom: 0.35rem;
+}
+
+.trade-apt__methods {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.trade-apt__method-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #1b4332;
+  cursor: pointer;
+}
+
+.trade-apt__input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid rgba(45, 106, 79, 0.2);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: #fff;
+}
+
+.trade-apt__badge {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #1b4332;
+}
+
+.trade-apt__summary {
+  margin: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.trade-apt__summary dt {
+  font-size: 0.68rem;
+  color: #84a98c;
+  margin: 0;
+}
+
+.trade-apt__summary dd {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1b4332;
+}
+
+.trade-apt__hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #52796f;
+}
+
+.trade-apt__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.trade-apt__btn {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid rgba(45, 106, 79, 0.25);
+  border-radius: 8px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2d6a4f;
+  cursor: pointer;
+}
+
+.trade-apt__btn--primary {
+  background: #2d6a4f;
+  border-color: #2d6a4f;
+  color: #fff;
+}
+
+.trade-apt__link {
+  margin-top: 0.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: #2d6a4f;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.trade-apt__error {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #c1121f;
+}

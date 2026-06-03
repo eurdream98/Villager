@@ -1,0 +1,25 @@
+.tree-icon {
+  display: block;
+  transform-origin: center bottom;
+  filter: drop-shadow(0 4px 6px rgba(27, 67, 50, 0.2));
+}
+
+.tree-icon__trunk {
+  fill: #6b4f3a;
+}
+
+.tree-icon__canopy--back {
+  fill: #40916c;
+}
+
+.tree-icon__canopy--mid {
+  fill: #52b788;
+}
+
+.tree-icon__canopy--front {
+  fill: #74c69d;
+}
+
+.tree-icon__fruit {
+  fill: #f4a261;
+}
