@@ -133,6 +133,8 @@ create table public.trade_conversations (
   seller_id uuid not null references public.profiles (id) on delete cascade,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
+  buyer_last_read_at timestamptz,
+  seller_last_read_at timestamptz,
   unique (listing_id, buyer_id),
   check (buyer_id <> seller_id)
 );
@@ -191,12 +193,36 @@ create table public.trade_orders (
   escrow_status escrow_status not null default 'pending_payment',
   paid_at timestamptz,
   fulfilled_at timestamptz,            -- 판매자 발송/배치
-  confirmed_at timestamptz,            -- 구매자 수령 확인
+  confirmed_at timestamptz,            -- 구매자 수령 확인 → 검수 타이머 시작
   released_at timestamptz,
+  refunded_at timestamptz,
+  payment_deadline_at timestamptz,     -- 약속 확정 후 구매자 결제 기한
+  inspection_deadline_at timestamptz,  -- 수령 확인 후 자동 정산 기한
+  receipt_confirm_deadline_at timestamptz, -- 이행 후 자동 수령 확정 기한
+  disputed_at timestamptz,
+  dispute_reason text,
+  dispute_detail text,
+  settlement_amount int,               -- 최종 판매자 정산액 (부분 환불 시)
+  pending_settlement_type text,        -- keep_full | return_refund | partial_refund
+  pending_settlement_amount int,
+  pending_settlement_by uuid references public.profiles (id),
+  pending_settlement_at timestamptz,
   payment_ref text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+create index trade_orders_escrow_status_payment_deadline_idx
+  on public.trade_orders (escrow_status, payment_deadline_at)
+  where payment_deadline_at is not null;
+
+create index trade_orders_escrow_status_inspection_deadline_idx
+  on public.trade_orders (escrow_status, inspection_deadline_at)
+  where inspection_deadline_at is not null;
+
+create index trade_orders_seller_fulfilled_receipt_deadline_idx
+  on public.trade_orders (escrow_status, receipt_confirm_deadline_at)
+  where escrow_status = 'seller_fulfilled' and receipt_confirm_deadline_at is not null;
 
 -- ---------------------------------------------------------------------------
 -- 뷰: 피드용 (프론트 trade.js select 와 맞춤)

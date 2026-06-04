@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { markConversationRead } from '../../lib/chatApi';
 import { useTradeChat } from '../../hooks/useTradeChat';
 import { formatPrice } from '../../lib/trade';
 import TradeAppointmentPanel from './TradeAppointmentPanel';
+import TradeEscrowPanel from './TradeEscrowPanel';
 import './Trade.css';
 
 function formatTime(iso) {
@@ -33,22 +35,43 @@ function TradeChatScreen({
   user,
   sellerId,
   onBack,
+  embedded = false,
+  onMarkedRead,
 }) {
   const [draft, setDraft] = useState('');
-  const listEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const lastAutoScrollKeyRef = useRef('');
   const {
     messages,
     appointment,
+    order,
     status,
     sendMessage,
     proposeAppointment,
     confirmAppointment,
     resetAppointment,
+    refresh,
   } = useTradeChat(conversationId);
 
   useEffect(() => {
-    listEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, appointment]);
+    if (!messages.length) return;
+    const last = messages[messages.length - 1];
+    const scrollKey = `${messages.length}:${last?.id ?? ''}`;
+    if (scrollKey === lastAutoScrollKeyRef.current) return;
+    lastAutoScrollKeyRef.current = scrollKey;
+
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    container.scrollTop = container.scrollHeight;
+  }, [messages]);
+
+  useEffect(() => {
+    if (!conversationId || status !== 'connected') return undefined;
+    markConversationRead(conversationId)
+      .then(() => onMarkedRead?.())
+      .catch(() => {});
+    return undefined;
+  }, [conversationId, status, messages.length, onMarkedRead]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,23 +83,36 @@ function TradeChatScreen({
   const roleLabel = tradeInfo?.role ? ROLE_LABEL[tradeInfo.role] : null;
 
   return (
-    <div className="trade-chat">
-      <header className="trade-chat__header">
-        <button type="button" className="trade-chat__back" onClick={onBack}>
-          ← 목록
-        </button>
-        <div className="trade-chat__header-info">
-          <h2 className="trade-chat__title">{title}</h2>
-          <p className="trade-chat__peer">{peerName}와 대화</p>
-        </div>
-        <span
-          className={`trade-chat__status trade-chat__status--${status}`}
-          title={STATUS_LABEL[status]}
-        >
-          {STATUS_LABEL[status]}
-        </span>
-      </header>
+    <div className={`trade-chat${embedded ? ' trade-chat--embedded' : ''}`}>
+      {embedded ? (
+        <header className="trade-chat__embedded-header">
+          <h2 className="trade-chat__embedded-title">{peerName}</h2>
+          <span
+            className={`trade-chat__status trade-chat__status--${status}`}
+            title={STATUS_LABEL[status]}
+          >
+            {STATUS_LABEL[status]}
+          </span>
+        </header>
+      ) : (
+        <header className="trade-chat__header">
+          <button type="button" className="trade-chat__back" onClick={onBack}>
+            ← 목록
+          </button>
+          <div className="trade-chat__header-info">
+            <h2 className="trade-chat__title">{title}</h2>
+            <p className="trade-chat__peer">{peerName}와 대화</p>
+          </div>
+          <span
+            className={`trade-chat__status trade-chat__status--${status}`}
+            title={STATUS_LABEL[status]}
+          >
+            {STATUS_LABEL[status]}
+          </span>
+        </header>
+      )}
 
+      {!embedded && (
       <div className="trade-chat__trade-banner" aria-label="거래 정보">
         {tradeInfo?.listingImageUrl ? (
           <img
@@ -104,17 +140,32 @@ function TradeChatScreen({
           <p className="trade-chat__trade-peer">상대: {peerName}</p>
         </div>
       </div>
+      )}
 
       <TradeAppointmentPanel
         appointment={appointment}
+        order={order}
         currentUserId={user.id}
         sellerId={sellerId}
+        listingFree={tradeInfo?.listingFree ?? false}
         onPropose={proposeAppointment}
         onConfirm={confirmAppointment}
         onReset={resetAppointment}
       />
 
-      <ul className="trade-chat__messages" aria-live="polite">
+      <TradeEscrowPanel
+        order={order}
+        currentUserId={user.id}
+        sellerId={sellerId}
+        listingFree={tradeInfo?.listingFree ?? false}
+        onAction={refresh}
+      />
+
+      <ul
+        ref={messagesContainerRef}
+        className="trade-chat__messages"
+        aria-live="polite"
+      >
         {messages.length === 0 && (
           <li className="trade-chat__empty">첫 메시지를 보내 보세요.</li>
         )}
@@ -136,10 +187,12 @@ function TradeChatScreen({
             </li>
           );
         })}
-        <li ref={listEndRef} />
       </ul>
 
-      <form className="trade-chat__composer" onSubmit={handleSubmit}>
+      <form
+        className={`trade-chat__composer${embedded ? ' trade-chat__composer--embedded' : ''}`}
+        onSubmit={handleSubmit}
+      >
         <input
           type="text"
           className="trade-chat__input"

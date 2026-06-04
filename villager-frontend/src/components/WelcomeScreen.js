@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { signInWithProvider } from '../lib/auth';
+import { signInAsDevBuyer, signInAsDevSeller, signInWithProvider } from '../lib/auth';
+import { isTabIsolatedAuth } from '../lib/authStorage';
+import { isDevLoginEnabled } from '../lib/devAuth';
 import { isGoogleOAuthBlockedBrowser, isKakaoTalkInApp } from '../lib/browser';
 import GoogleInAppNotice from './GoogleInAppNotice';
 import './WelcomeScreen.css';
@@ -96,6 +98,21 @@ function WelcomeScreen({ oauthError, onClearOAuthError }) {
   const googleBlockedInApp = isGoogleOAuthBlockedBrowser();
   const displayError = authError || oauthError;
 
+  const handleDevLogin = async (role) => {
+    setAuthError(null);
+    onClearOAuthError?.();
+    const key = role === 'seller' ? 'dev-seller' : 'dev-buyer';
+    setLoadingProvider(key);
+    try {
+      if (role === 'seller') await signInAsDevSeller();
+      else await signInAsDevBuyer();
+    } catch (err) {
+      const label = role === 'seller' ? '데모 판매자' : '데모 구매자';
+      setAuthError(err.message || `${label} 로그인에 실패했습니다.`);
+      setLoadingProvider(null);
+    }
+  };
+
   const handleOAuth = async (provider) => {
     setAuthError(null);
     onClearOAuthError?.();
@@ -179,6 +196,45 @@ function WelcomeScreen({ oauthError, onClearOAuthError }) {
               {loadingProvider === 'kakao' ? '연결 중…' : '카카오로 계속하기'}
             </span>
           </button>
+
+          {isDevLoginEnabled() && (
+            <div className="welcome__dev">
+              <p className="welcome__dev-label">개발 전용</p>
+              {isTabIsolatedAuth() && (
+                <p className="welcome__dev-hint welcome__dev-hint--tab">
+                  탭마다 다른 계정 유지됩니다. 창 A·B를 열고 각각 Google / 카카오(또는 아래
+                  데모 버튼)로 로그인하세요.
+                </p>
+              )}
+              <button
+                type="button"
+                className="social-btn social-btn--dev-seller"
+                onClick={() => handleDevLogin('seller')}
+                disabled={!!loadingProvider}
+              >
+                <span>
+                  {loadingProvider === 'dev-seller'
+                    ? '로그인 중…'
+                    : '데모 판매자로 로그인'}
+                </span>
+              </button>
+              <button
+                type="button"
+                className="social-btn social-btn--dev-buyer"
+                onClick={() => handleDevLogin('buyer')}
+                disabled={!!loadingProvider}
+              >
+                <span>
+                  {loadingProvider === 'dev-buyer'
+                    ? '로그인 중…'
+                    : '데모 구매자로 로그인'}
+                </span>
+              </button>
+              <p className="welcome__dev-hint">
+                비밀번호·더미 데이터: <code>supabase/seed-dev-buyer.sql</code> 1회 실행
+              </p>
+            </div>
+          )}
         </div>
 
         <p className="welcome__terms">

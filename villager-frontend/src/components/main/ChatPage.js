@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useConversations } from '../../hooks/useConversations';
+import { markConversationRead } from '../../lib/chatApi';
 import { formatPrice } from '../../lib/trade';
 import TradeChatScreen from '../trade/TradeChatScreen';
+import ChatUnreadBadge from './ChatUnreadBadge';
 import '../trade/Trade.css';
 import './ChatPage.css';
 
@@ -15,9 +17,31 @@ const APPOINTMENT_BADGE = {
   pending: '약속 제안',
 };
 
-function ChatPage({ user }) {
+function ChatPage({ user, onUnreadChange }) {
   const { conversations, loading, error, reload } = useConversations();
   const [activeChat, setActiveChat] = useState(null);
+
+  const handleCloseChat = () => {
+    setActiveChat(null);
+    reload();
+    onUnreadChange?.();
+  };
+
+  const handleOpenChat = (conv) => {
+    setActiveChat(conv);
+    markConversationRead(conv.id)
+      .then(() => {
+        reload();
+        onUnreadChange?.();
+      })
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    if (!activeChat) {
+      onUnreadChange?.();
+    }
+  }, [activeChat, onUnreadChange]);
 
   if (activeChat && user) {
     return (
@@ -28,7 +52,11 @@ function ChatPage({ user }) {
         conversationId={activeChat.id}
         user={user}
         sellerId={activeChat.sellerId}
-        onBack={() => setActiveChat(null)}
+        onBack={handleCloseChat}
+        onMarkedRead={() => {
+          reload();
+          onUnreadChange?.();
+        }}
       />
     );
   }
@@ -65,7 +93,7 @@ function ChatPage({ user }) {
                 <button
                   type="button"
                   className="chat-room-card"
-                  onClick={() => setActiveChat(conv)}
+                  onClick={() => handleOpenChat(conv)}
                 >
                   <div className="chat-room-card__thumb">
                     {conv.listingImageUrl ? (
@@ -88,6 +116,10 @@ function ChatPage({ user }) {
                         </span>
                       )}
                       <time className="chat-room-card__time">{conv.updatedAt}</time>
+                      <ChatUnreadBadge
+                        count={conv.unreadCount}
+                        className="chat-unread-badge--room"
+                      />
                     </div>
                     <p className="chat-room-card__title">{conv.listingTitle}</p>
                     <p className="chat-room-card__price">

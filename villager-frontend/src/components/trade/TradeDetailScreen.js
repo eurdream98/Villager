@@ -1,16 +1,37 @@
+import { usableListingImageUrls } from '../../lib/listingImages';
 import { formatPrice } from '../../lib/trade';
+import TradeChatScreen from './TradeChatScreen';
+import TradeDetailBuyerStarter from './TradeDetailBuyerStarter';
+import TradeDetailChats from './TradeDetailChats';
+import TradeDetailGallery from './TradeDetailGallery';
 import './Trade.css';
 
 function TradeDetailScreen({
   listing,
   user,
   onBack,
-  onChat,
   hasConfirmedAppointment,
   onOpenExistingChat,
+  listingConversations,
+  listingConversationsLoading,
+  onOpenListingChat,
+  buyerConversationId,
+  buyerPeerName,
+  buyerChatLoading,
+  onBuyerFirstMessage,
 }) {
   const isOwnListing =
     user?.id && listing.sellerId && user.id === listing.sellerId;
+  const imageUrls = usableListingImageUrls(listing.imageUrls);
+
+  const buyerTradeInfo = {
+    listingTitle: listing.title,
+    listingImageUrl: imageUrls[0] ?? '',
+    listingPrice: listing.price,
+    listingFree: listing.isFree,
+    neighborhood: listing.neighborhood,
+    role: 'buyer',
+  };
 
   return (
     <div className="trade-detail">
@@ -38,22 +59,54 @@ function TradeDetailScreen({
         </div>
       )}
 
-      <div className="trade-detail__body">
-        <div className="trade-detail__gallery">
-          {listing.imageUrls.length > 0 ? (
-            listing.imageUrls.map((url, i) => (
-              <img
-                key={url}
-                src={url}
-                alt={i === 0 ? listing.title : ''}
-                className="trade-detail__image"
+      <div
+        className={`trade-detail__body${!isOwnListing ? ' trade-detail__body--buyer-chat' : ''}`}
+      >
+        <div className="trade-detail__split">
+          <TradeDetailGallery imageUrls={imageUrls} title={listing.title} />
+
+          <section
+            className={`trade-detail__chats-panel${!isOwnListing ? ' trade-detail__chats-panel--buyer' : ''}`}
+            aria-labelledby="trade-detail-chats-title"
+          >
+            {isOwnListing ? (
+              <>
+                <TradeDetailChats
+                  conversations={listingConversations}
+                  loading={listingConversationsLoading}
+                  isOwnListing
+                  onOpenChat={onOpenListingChat}
+                />
+              </>
+            ) : buyerChatLoading ? (
+              <p className="trade-detail__chats-loading">판매자와 채팅 불러오는 중…</p>
+            ) : !user ? (
+              <div className="trade-detail__chats-empty-wrap" role="status">
+                <p className="trade-detail__chats-empty">
+                  <span className="trade-detail__chats-empty-emoji" aria-hidden>
+                    💬
+                  </span>
+                  로그인 후 채팅할 수 있습니다.
+                </p>
+              </div>
+            ) : buyerConversationId ? (
+              <TradeChatScreen
+                embedded
+                tradeInfo={buyerTradeInfo}
+                listingTitle={listing.title}
+                peerName={buyerPeerName}
+                conversationId={buyerConversationId}
+                user={user}
+                sellerId={listing.sellerId}
               />
-            ))
-          ) : (
-            <div className="trade-detail__image trade-detail__image--empty">
-              사진 없음
-            </div>
-          )}
+            ) : (
+              <TradeDetailBuyerStarter
+                peerName={buyerPeerName || listing.sellerName || '판매자'}
+                onSendFirstMessage={onBuyerFirstMessage}
+                disabled={!onBuyerFirstMessage}
+              />
+            )}
+          </section>
         </div>
 
         <div className="trade-detail__info">
@@ -79,9 +132,9 @@ function TradeDetailScreen({
         </div>
       </div>
 
-      <footer className="trade-detail__footer">
-        {isOwnListing ? (
-          hasConfirmedAppointment && onOpenExistingChat ? (
+      {isOwnListing && (
+        <footer className="trade-detail__footer">
+          {hasConfirmedAppointment && onOpenExistingChat ? (
             <button
               type="button"
               className="trade-detail__chat-btn"
@@ -91,13 +144,9 @@ function TradeDetailScreen({
             </button>
           ) : (
             <p className="trade-detail__own-hint">내가 올린 상품입니다</p>
-          )
-        ) : (
-          <button type="button" className="trade-detail__chat-btn" onClick={onChat}>
-            채팅하기
-          </button>
-        )}
-      </footer>
+          )}
+        </footer>
+      )}
     </div>
   );
 }

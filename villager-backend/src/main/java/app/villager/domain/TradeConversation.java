@@ -32,4 +32,10 @@ public class TradeConversation {
 
   @Column(name = "updated_at")
   private Instant updatedAt;
+
+  @Column(name = "buyer_last_read_at")
+  private Instant buyerLastReadAt;
+
+  @Column(name = "seller_last_read_at")
+  private Instant sellerLastReadAt;
 }

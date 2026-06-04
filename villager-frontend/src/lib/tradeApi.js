@@ -1,4 +1,5 @@
 import { apiFetch, isApiEnabled } from './api';
+import { usableListingImageUrls } from './listingImages';
 import { fetchTradeListings as fetchTradeListingsSupabase } from './trade';
 
 function mapListing(row) {
@@ -8,7 +9,7 @@ function mapListing(row) {
     description: row.description ?? '',
     price: row.isFree ? 0 : row.price,
     isFree: row.isFree,
-    imageUrls: row.imageUrls ?? [],
+    imageUrls: usableListingImageUrls(row.imageUrls),
     tradeMethods: row.tradeMethods ?? [],
     neighborhood: row.neighborhood ?? '',
     sellerId: row.sellerId,

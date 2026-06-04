@@ -591,30 +591,402 @@
   padding-bottom: 5rem;
 }
 
-.trade-detail__gallery {
-  display: flex;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
+.trade-detail__body--buyer-chat {
+  padding-bottom: 1rem;
 }
 
-.trade-detail__image {
+.trade-detail__split {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem 0;
+  align-items: stretch;
+  height: clamp(280px, 44vh, 400px);
+  max-height: clamp(280px, 44vh, 400px);
   flex-shrink: 0;
-  width: min(85vw, 320px);
-  height: min(85vw, 320px);
-  border-radius: 12px;
-  object-fit: cover;
-  scroll-snap-align: start;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.trade-detail__gallery {
+  flex: 1 1 50%;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  height: 100%;
+  overflow: hidden;
+  align-self: stretch;
+}
+
+/* —— 상세 사진 모자이크 (1~5장) —— */
+
+.trade-detail__gallery--mosaic {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  min-height: 0;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  contain: layout style paint;
+}
+
+.trade-detail__gallery--count-0 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.trade-detail__gallery--count-1 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.trade-detail__gallery--count-2 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+}
+
+.trade-detail__gallery--count-3 {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 1fr;
+}
+
+.trade-detail__gallery--count-4 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.trade-detail__gallery--count-5 {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.trade-detail__gallery--mosaic > .trade-detail__gallery-cell {
+  min-width: 0;
+  min-height: 0;
+}
+
+.trade-detail__gallery-quad {
+  grid-column: 1 / 3;
+  grid-row: 1 / 3;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 3px;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.trade-detail__gallery--count-5 .trade-detail__gallery-side {
+  grid-column: 3 / 5;
+  grid-row: 1 / 3;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 3px;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+  padding: 0;
+  background: #e8f5e9;
+  border-radius: 6px;
+}
+
+.trade-detail__gallery-cell {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 6px;
   background: #e8f5e9;
 }
 
-.trade-detail__image--empty {
+.trade-detail__gallery-cell--btn {
+  display: block;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: zoom-in;
+  font: inherit;
+  text-align: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.trade-detail__gallery-cell--btn:focus-visible {
+  outline: 2px solid #2d6a4f;
+  outline-offset: 2px;
+  z-index: 1;
+}
+
+.trade-detail__gallery-cell--btn .trade-detail__image {
+  pointer-events: none;
+}
+
+.trade-detail__gallery-cell--empty {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #84a98c;
+}
+
+.trade-detail__gallery--mosaic .trade-detail__image {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+/* 5번째: 위·아래 각 50% 칸에 사진 상단·하단 반쪽 */
+.trade-detail__gallery-side-half {
+  display: block;
+  min-height: 0;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background-size: 100% 200%;
+}
+
+.trade-detail__gallery-side-half--top {
+  background-position: center top;
+  border-radius: 6px 6px 0 0;
+}
+
+.trade-detail__gallery-side-half--bottom {
+  background-position: center bottom;
+  border-radius: 0 0 6px 6px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.trade-detail__gallery-more {
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.35rem;
+  z-index: 2;
+  padding: 0.15rem 0.45rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(27, 67, 50, 0.75);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.trade-detail__gallery-more:hover {
+  background: rgba(27, 67, 50, 0.9);
+}
+
+/* —— 상세 사진 원본 뷰어 —— */
+
+.trade-detail-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0)
+    env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+}
+
+.trade-detail-lightbox__backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: rgba(15, 30, 22, 0.92);
+  cursor: pointer;
+}
+
+.trade-detail-lightbox__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 56rem);
+  height: min(100%, 100%);
+  max-height: 100%;
+  pointer-events: none;
+}
+
+.trade-detail-lightbox__header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  pointer-events: auto;
+}
+
+.trade-detail-lightbox__counter {
   font-size: 0.9rem;
+  font-weight: 700;
+  color: #d8f3dc;
+}
+
+.trade-detail-lightbox__close {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.trade-detail-lightbox__close:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.trade-detail-lightbox__stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0 0.25rem 0.75rem;
+  pointer-events: auto;
+}
+
+.trade-detail-lightbox__img {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.trade-detail-lightbox__nav {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0 0 0.15rem;
+}
+
+.trade-detail-lightbox__nav:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.trade-detail-lightbox__nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.trade-detail__chats-panel {
+  flex: 1 1 50%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.6rem 0.65rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(45, 106, 79, 0.12);
+  overflow: hidden;
+}
+
+.trade-detail__chats-panel--buyer {
+  padding: 0;
+  background: rgba(255, 255, 255, 0.92);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.trade-detail__chats-panel--buyer > .trade-chat--embedded,
+.trade-detail__chats-panel--buyer > .trade-chat--starter {
+  flex: 1;
+  min-height: 0;
+}
+
+.trade-detail__chats-panel .trade-detail__section-title {
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.trade-detail__chats-panel .trade-detail__chats-list,
+.trade-detail__chats-panel .trade-detail__chats-loading,
+.trade-detail__chats-panel .trade-detail__chats-empty-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.trade-detail__chats-empty-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0.75rem;
+  overflow: hidden;
+}
+
+.trade-detail__chats-empty {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  text-align: center;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #52796f;
+  line-height: 1.45;
+  max-width: 15rem;
+}
+
+.trade-detail__chats-empty-emoji {
+  flex-shrink: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.trade-detail__image--empty {
+  color: #84a98c;
+  font-size: 0.85rem;
 }
 
 .trade-detail__info {
@@ -736,6 +1108,103 @@
   display: flex;
   flex-direction: column;
   background: #f0f7f4;
+}
+
+.trade-chat--embedded {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+.trade-chat__embedded-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid rgba(45, 106, 79, 0.1);
+}
+
+.trade-chat__embedded-title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #1b4332;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trade-chat--embedded .trade-chat__messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.5rem 0.65rem;
+  gap: 0.45rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.trade-chat--embedded .trade-chat__msg {
+  max-width: 92%;
+  padding: 0.45rem 0.65rem;
+}
+
+.trade-chat--embedded .trade-chat__msg-text {
+  font-size: 0.82rem;
+}
+
+.trade-chat--embedded .trade-appointment,
+.trade-chat--embedded .trade-escrow {
+  flex-shrink: 0;
+  max-height: 38%;
+  overflow-y: auto;
+  font-size: 0.8rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.trade-chat__composer--embedded {
+  flex-shrink: 0;
+  padding: 0.45rem 0.5rem;
+}
+
+.trade-chat__composer--embedded .trade-chat__input {
+  padding: 0.5rem 0.65rem;
+  font-size: 0.85rem;
+}
+
+.trade-chat__composer--embedded .trade-chat__send {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.trade-chat--starter {
+  min-height: 0;
+}
+
+.trade-chat__starter-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.75rem 0.65rem;
+}
+
+.trade-chat__starter-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #52796f;
+  text-align: center;
 }
 
 .trade-chat__header {
@@ -993,6 +1462,74 @@
   line-height: 1.45;
 }
 
+.trade-detail__chats-loading {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #52796f;
+}
+
+.trade-detail__chats-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.trade-detail__chat-item {
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.6rem;
+  border: 1px solid rgba(45, 106, 79, 0.15);
+  border-radius: 10px;
+  background: #fff;
+  font-family: inherit;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.25rem 0.5rem;
+}
+
+.trade-detail__chat-item:hover {
+  border-color: #40916c;
+  background: rgba(64, 145, 108, 0.06);
+}
+
+.trade-detail__chat-peer {
+  font-weight: 700;
+  color: #1b4332;
+  font-size: 0.85rem;
+}
+
+.trade-detail__chat-role,
+.trade-detail__chat-apt {
+  font-size: 0.72rem;
+  color: #40916c;
+  font-weight: 600;
+}
+
+.trade-detail__chat-preview {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  color: #52796f;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trade-detail__chat-time {
+  font-size: 0.72rem;
+  color: #84a98c;
+}
+
+.trade-escrow__countdown {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: #2d6a4f;
+  letter-spacing: 0.02em;
+}
+
 /* —— 약속 잡기 —— */
 
 .trade-apt {
@@ -1146,4 +1683,134 @@
   margin: 0;
   font-size: 0.8rem;
   color: #c1121f;
+}
+
+.trade-apt__hint--meet,
+.trade-apt__hint--pay {
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(244, 162, 97, 0.12);
+  border: 1px solid rgba(244, 162, 97, 0.25);
+}
+
+.trade-apt__method-note {
+  margin-left: 0.35rem;
+  font-size: 0.65rem;
+  color: #84a98c;
+}
+
+.trade-apt__method-note--escrow {
+  color: #2d6a4f;
+  font-weight: 700;
+}
+
+/* —— 에스크로 결제 —— */
+
+.trade-escrow {
+  flex-shrink: 0;
+  margin: 0 1rem 0.75rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid rgba(45, 106, 79, 0.2);
+  box-shadow: 0 2px 8px rgba(27, 67, 50, 0.06);
+}
+
+.trade-escrow__badge {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #1b4332;
+}
+
+.trade-escrow__amount {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1b4332;
+}
+
+.trade-escrow__status {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: #52796f;
+}
+
+.trade-escrow__steps {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.trade-escrow__step {
+  flex: 1;
+  padding: 0.35rem 0.2rem;
+  border-radius: 6px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-align: center;
+  color: #84a98c;
+  background: #f0f7f4;
+}
+
+.trade-escrow__step--done {
+  color: #2d6a4f;
+  background: rgba(64, 145, 108, 0.15);
+}
+
+.trade-escrow__step--current {
+  outline: 2px solid #2d6a4f;
+}
+
+.trade-escrow__deadline {
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #52796f;
+}
+
+.trade-escrow__deadline--warn {
+  color: #9c4a1a;
+  background: rgba(244, 162, 97, 0.1);
+  padding: 0.65rem;
+  border-radius: 8px;
+}
+
+.trade-escrow__hint {
+  font-size: 0.78rem;
+  color: #84a98c;
+}
+
+.trade-escrow__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.trade-escrow__pending {
+  margin-bottom: 0.75rem;
+  padding: 0.65rem;
+  border-radius: 8px;
+  background: rgba(64, 145, 108, 0.1);
+  font-size: 0.82rem;
+}
+
+.trade-escrow__form {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.trade-escrow__textarea {
+  resize: vertical;
+  min-height: 4rem;
+}
+
+.trade-escrow__mock {
+  margin: 0.75rem 0 0;
+  font-size: 0.72rem;
+  color: #84a98c;
 }

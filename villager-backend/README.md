@@ -28,9 +28,16 @@ spring:
           issuer-uri: https://YOUR_REF.supabase.co/auth/v1
 
 villager:
+  storage:
+    supabase-url: https://YOUR_REF.supabase.co
+    service-role-key: YOUR_SERVICE_ROLE_KEY   # API → service_role (프론트에 넣지 마세요)
+    bucket: trade-listings
   cors:
     allowed-origins: http://localhost:3000,http://localhost:3001
 ```
+
+판매 사진은 **Supabase Storage** 버킷 `trade-listings`에 저장됩니다.  
+SQL Editor에서 `villager-frontend/supabase/listing-images-storage.sql` 1회 실행.
 
 3. 실행 — **프론트 `npm start`와 다른 PowerShell 창**에서:
 
@@ -51,6 +58,17 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 
 - API: http://localhost:8080/api/v1/health
 - WebSocket (STOMP): http://localhost:8080/ws
+
+### DB 연결 오류 (`JDBCConnectionException` / `UnknownHostException`)
+
+Supabase Postgres에 붙지 못할 때:
+
+1. **인터넷** · Supabase 대시보드에서 프로젝트가 **일시 중지(paused)** 되지 않았는지 확인
+2. **`application-local.yml`** 의 `spring.datasource.url` · 비밀번호가  
+   Supabase → **Project Settings → Database → Connection string (URI)** 와 같은지 확인
+3. 로그에 `UnknownHostException` + `SocksSocketImpl` 이 보이면 **IDE/시스템 SOCKS 프록시** 때문일 수 있음 → **Villager Backend (local)** Run 또는 `.\run-local.ps1` (프록시 JVM 옵션 포함)
+4. `tenant/user postgres.xxxx not found` → pooler **호스트 리전이 틀림**. Dashboard → Database → **Session pooler** URI의 호스트·사용자를 **그대로** `SUPABASE_JDBC_URL` / `SUPABASE_DB_USER` 에 넣기 (`aws-0-ap-northeast-2` 등으로 추측하지 말 것)
+5. `UnknownHostException: db.xxxx.supabase.co` → 위 pooler URI 사용 또는 `.\run-local.ps1` (프록시 JVM 옵션)
 
 ## 인증
 
@@ -77,6 +95,14 @@ Spring이 Supabase JWT `issuer-uri`로 검증합니다. 백엔드는 DB에 **pos
 | POST | `/api/v1/conversations/{id}/appointment/propose` | 약속 제안 |
 | POST | `/api/v1/conversations/{id}/appointment/confirm` | 약속 확정 |
 | DELETE | `/api/v1/conversations/{id}/appointment` | 약속 초기화 |
+| GET | `/api/v1/conversations/{id}/order` | 에스크로 주문 조회 |
+| POST | `/api/v1/conversations/{id}/order/pay` | 결제 (mock) |
+| POST | `/api/v1/conversations/{id}/order/fulfill` | 발송/배치 완료 |
+| POST | `/api/v1/conversations/{id}/order/confirm-receipt` | 수령 확인 |
+| POST | `/api/v1/conversations/{id}/order/complete` | 거래 완료 |
+| POST | `/api/v1/conversations/{id}/order/dispute` | 문제 신고 |
+| POST | `/api/v1/conversations/{id}/order/propose-settlement` | 합의안 제안 |
+| POST | `/api/v1/conversations/{id}/order/accept-settlement` | 합의 수락 |
 | GET | `/api/v1/growth/me` | 내 성장 XP |
 | GET | `/api/v1/neighborhoods/trees` | 동네 나무 지도 |
 
@@ -85,6 +111,9 @@ Spring이 Supabase JWT `issuer-uri`로 검증합니다. 백엔드는 DB에 **pos
 - 연결: `SockJS` → `http://localhost:8080/ws`
 - 구독: `/topic/conversations.{conversationId}` → `MessageDto`
 - 구독: `/topic/conversations.{conversationId}.appointment` → `AppointmentDto`
+- 구독: `/topic/conversations.{conversationId}.order` → `TradeOrderDto`
+
+에스크로 상세: [ESCROW.md](./ESCROW.md)
 
 ## Railway 배포
 

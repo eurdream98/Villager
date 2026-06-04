@@ -7,7 +7,11 @@ Remove-Item Env:HOST -ErrorAction SilentlyContinue
 Remove-Item Env:PORT -ErrorAction SilentlyContinue
 Remove-Item Env:SERVER_PORT -ErrorAction SilentlyContinue
 Remove-Item Env:SERVER_ADDRESS -ErrorAction SilentlyContinue
+Remove-Item Env:HTTP_PROXY, Env:HTTPS_PROXY, Env:ALL_PROXY, Env:http_proxy, Env:https_proxy -ErrorAction SilentlyContinue
 
 Set-Location $PSScriptRoot
 Write-Host "Starting villager-backend on http://127.0.0.1:8080 ..."
-.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"
+# Supabase DB 호스트는 IPv6(AAAA)만 있는 경우가 있어 IPv6 우선
+# preferIPv6: Supabase JDBC(AAAA)용. server.address=0.0.0.0 과 함께 Tomcat 은 IPv4 로 listen.
+$jvmArgs = "-Djava.net.preferIPv6Addresses=true -Dserver.port=8080 -Dserver.address=0.0.0.0 -Djava.net.useSystemProxies=false -DsocksProxyHost= -DsocksProxyPort= -Dhttp.proxyHost= -Dhttps.proxyHost= -Dhttp.nonProxyHosts=*"
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local" "-Dspring-boot.run.jvmArguments=$jvmArgs"

@@ -2,19 +2,27 @@
 # Run: .\run-local.ps1  (또는 npm 과 다른 터미널에서 mvnw 실행)
 
 server:
+  # Windows + -Djava.net.preferIPv6Addresses (run-local.ps1): IPv4 로 listen
+  address: 0.0.0.0
   port: 8080
 
 spring:
   datasource:
-    url: jdbc:postgresql://db.YOUR_PROJECT_REF.supabase.co:5432/postgres?sslmode=require
-    username: postgres
-    password: YOUR_DB_PASSWORD
+    # Session pooler — Dashboard → Connect → Session mode (호스트·사용자는 프로젝트마다 다름)
+    url: ${SUPABASE_JDBC_URL:jdbc:postgresql://aws-1-REGION.pooler.supabase.com:5432/postgres?sslmode=require}
+    username: ${SUPABASE_DB_USER:postgres.YOUR_PROJECT_REF}
+    password: ${SUPABASE_DB_PASSWORD:YOUR_DB_PASSWORD}
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: https://YOUR_PROJECT_REF.supabase.co/auth/v1
 
+# Project Settings → API → service_role (절대 프론트·Git에 넣지 마세요)
 villager:
+  storage:
+    supabase-url: https://YOUR_PROJECT_REF.supabase.co
+    service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:YOUR_SERVICE_ROLE_KEY}
+    bucket: trade-listings
   cors:
     allowed-origins: http://localhost:3000,http://localhost:3001

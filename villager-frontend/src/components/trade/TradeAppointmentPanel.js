@@ -10,8 +10,10 @@ import './Trade.css';
 
 function TradeAppointmentPanel({
   appointment,
+  order,
   currentUserId,
   sellerId,
+  listingFree,
   onPropose,
   onConfirm,
   onReset,
@@ -51,6 +53,10 @@ function TradeAppointmentPanel({
 
   if (appointment?.status === APPOINTMENT_STATUS.CONFIRMED) {
     const summary = formatAppointmentSummary(appointment);
+    const isMeet = appointment.tradeMethod === 'meet';
+    const isEscrowMethod =
+      !listingFree && (appointment.tradeMethod === 'shipping' || appointment.tradeMethod === 'door');
+    const isBuyer = currentUserId !== sellerId;
     return (
       <div className="trade-apt trade-apt--confirmed">
         <p className="trade-apt__badge">✅ 약속 완료</p>
@@ -68,6 +74,24 @@ function TradeAppointmentPanel({
             <dd>{summary.location}</dd>
           </div>
         </dl>
+        {isMeet && (
+          <p className="trade-apt__hint trade-apt__hint--meet">
+            만나서 거래는 현장에서 물건을 확인한 뒤 직접 결제해 주세요. 에스크로 결제는
+            사용하지 않습니다.
+          </p>
+        )}
+        {isEscrowMethod && isBuyer && order?.escrowStatus === 'pending_payment' && (
+          <p className="trade-apt__hint trade-apt__hint--pay">
+            <strong>{order.paymentDeadlineHours}시간 이내</strong> 아래 「결제하기」로
+            {summary.methodLabel} 금액을 입금해 주세요.
+          </p>
+        )}
+        {isEscrowMethod && !isBuyer && order?.escrowStatus === 'pending_payment' && (
+          <p className="trade-apt__hint trade-apt__hint--pay">
+            구매자가 {order.paymentDeadlineHours}시간 이내에 에스크로 결제를 완료해야
+            거래가 진행됩니다.
+          </p>
+        )}
         <button type="button" className="trade-apt__link" onClick={onReset}>
           약속 다시 잡기
         </button>
@@ -153,6 +177,14 @@ function TradeAppointmentPanel({
                       onChange={() => setTradeMethod(m.id)}
                     />
                     <span>{m.label}</span>
+                    {m.id === 'meet' && (
+                      <span className="trade-apt__method-note">현장 결제</span>
+                    )}
+                    {(m.id === 'shipping' || m.id === 'door') && (
+                      <span className="trade-apt__method-note trade-apt__method-note--escrow">
+                        에스크로
+                      </span>
+                    )}
                   </label>
                 </li>
               ))}

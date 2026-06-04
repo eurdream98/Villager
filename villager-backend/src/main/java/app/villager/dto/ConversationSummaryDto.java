@@ -17,4 +17,5 @@ public record ConversationSummaryDto(
     UUID peerId,
     String appointmentStatus,
     String lastMessagePreview,
-    String updatedAt) {}
+    String updatedAt,
+    int unreadCount) {}

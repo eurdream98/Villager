@@ -1,8 +1,9 @@
+import { usableListingImageUrls } from '../../lib/listingImages';
 import { formatPrice } from '../../lib/trade';
 import './Trade.css';
 
 function TradeListingCard({ listing, onClick }) {
-  const thumb = listing.imageUrls[0];
+  const thumb = usableListingImageUrls(listing.imageUrls)[0];
 
   return (
     <article className="trade-card">

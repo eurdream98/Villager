@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { DEV_BUYER, DEV_SELLER } from './devAuth';
 
 /**
  * OAuth 로그인 후 돌아올 URL
@@ -49,4 +50,34 @@ export async function signInWithProvider(provider) {
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
+}
+
+async function signInWithDevCredentials({ email, password, roleLabel }) {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    throw new Error(
+      `${roleLabel} 로그인 실패: ${error.message}\n` +
+        'Supabase SQL Editor에서 supabase/seed-dev-buyer.sql 실행, ' +
+        'Authentication → Providers → Email 활성화를 확인하세요.',
+    );
+  }
+  return data.session;
+}
+
+/** 개발 전용 — seed-dev-buyer.sql 의 구매자 계정 */
+export async function signInAsDevBuyer() {
+  return signInWithDevCredentials({
+    email: DEV_BUYER.email,
+    password: DEV_BUYER.password,
+    roleLabel: '데모 구매자',
+  });
+}
+
+/** 개발 전용 — 판매자 계정 (채팅 상대 확인용) */
+export async function signInAsDevSeller() {
+  return signInWithDevCredentials({
+    email: DEV_SELLER.email,
+    password: DEV_SELLER.password,
+    roleLabel: '데모 판매자',
+  });
 }

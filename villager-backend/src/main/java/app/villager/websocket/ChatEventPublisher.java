@@ -3,6 +3,7 @@ package app.villager.websocket;
 import java.util.UUID;
 import app.villager.dto.AppointmentDto;
 import app.villager.dto.MessageDto;
+import app.villager.dto.TradeOrderDto;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
@@ -25,5 +26,11 @@ public class ChatEventPublisher {
     messagingTemplate.convertAndSend(
         "/topic/conversations." + conversationId + ".appointment",
         appointment);
+  }
+
+  public void publishOrder(UUID conversationId, TradeOrderDto order) {
+    messagingTemplate.convertAndSend(
+        "/topic/conversations." + conversationId + ".order",
+        order);
   }
 }

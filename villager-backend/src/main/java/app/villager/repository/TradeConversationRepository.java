@@ -14,4 +14,6 @@ public interface TradeConversationRepository extends JpaRepository<TradeConversa
 
   List<TradeConversation> findByListingIdAndBuyerIdOrListingIdAndSellerId(
       UUID listingId, UUID buyerId, UUID listingId2, UUID sellerId);
+
+  List<TradeConversation> findByListingIdOrderByUpdatedAtDesc(UUID listingId);
 }

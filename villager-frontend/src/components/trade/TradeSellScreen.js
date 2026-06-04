@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { uploadListingImages } from '../../lib/listingImages';
 import './Trade.css';
 
 const EMPTY_FORM = {
@@ -6,10 +7,9 @@ const EMPTY_FORM = {
   isFree: false,
   price: '',
   neighborhood: '',
-  imageUrls: [],
 };
 
-function TradeSellScreen({ onClose, onSubmit }) {
+function TradeSellScreen({ user, onClose, onSubmit }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [previews, setPreviews] = useState([]);
   const [error, setError] = useState(null);
@@ -20,15 +20,12 @@ function TradeSellScreen({ onClose, onSubmit }) {
     if (!files.length) return;
 
     const newPreviews = files.map((file) => ({
-      id: `${file.name}-${file.lastModified}`,
+      id: `${file.name}-${file.lastModified}-${file.size}`,
+      file,
       url: URL.createObjectURL(file),
     }));
 
     setPreviews((prev) => [...prev, ...newPreviews].slice(0, 10));
-    setForm((prev) => ({
-      ...prev,
-      imageUrls: [...prev.imageUrls, ...newPreviews.map((p) => p.url)].slice(0, 10),
-    }));
     e.target.value = '';
   };
 
@@ -36,10 +33,6 @@ function TradeSellScreen({ onClose, onSubmit }) {
     const removed = previews.find((p) => p.id === id);
     if (removed?.url) URL.revokeObjectURL(removed.url);
     setPreviews((prev) => prev.filter((p) => p.id !== id));
-    setForm((prev) => ({
-      ...prev,
-      imageUrls: prev.imageUrls.filter((url) => url !== removed?.url),
-    }));
   };
 
   const handleSubmit = async (e) => {
@@ -50,8 +43,12 @@ function TradeSellScreen({ onClose, onSubmit }) {
       setError('제목을 입력해 주세요.');
       return;
     }
-    if (form.imageUrls.length === 0) {
+    if (previews.length === 0) {
       setError('물건 사진을 1장 이상 등록해 주세요.');
+      return;
+    }
+    if (!user?.id) {
+      setError('로그인 후 등록할 수 있습니다.');
       return;
     }
     if (!form.isFree && (!form.price || Number(form.price) <= 0)) {
@@ -61,13 +58,17 @@ function TradeSellScreen({ onClose, onSubmit }) {
 
     setSubmitting(true);
     try {
+      const imageUrls = await uploadListingImages(
+        previews.map((p) => p.file),
+        user.id,
+      );
       await onSubmit({
         title: form.title,
         description: '',
         isFree: form.isFree,
         price: form.isFree ? 0 : form.price,
         neighborhood: form.neighborhood,
-        imageUrls: form.imageUrls,
+        imageUrls,
       });
       previews.forEach((p) => URL.revokeObjectURL(p.url));
       onClose();
@@ -203,7 +204,7 @@ function TradeSellScreen({ onClose, onSubmit }) {
           className="trade-sell__submit"
           disabled={submitting}
         >
-          {submitting ? '등록 중…' : '판매 글 올리기'}
+          {submitting ? '사진 업로드·등록 중…' : '판매 글 올리기'}
         </button>
       </form>
     </div>

@@ -27,7 +27,23 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${SUPABASE_JWT_ISSUER:https://your-project.supabase.co/auth/v1}
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 55MB
 
 villager:
+  storage:
+    supabase-url: ${SUPABASE_URL:https://cnghnbhgcpyubtfdlqyy.supabase.co}
+    service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNuZ2huYmhnY3B5dWJ0ZmRscXl5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTYxNzgyNiwiZXhwIjoyMDk1MTkzODI2fQ.-_hj4Si1Jly5K6K5Ek8FHo80X0Px0IYqukpzBsd484Y}
+    bucket: ${SUPABASE_STORAGE_BUCKET:trade-listings}
+    max-file-bytes: 5242880
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000}
+  escrow:
+    payment-deadline-hours: 24
+    inspection-deadline-hours-shipping: 168
+    inspection-deadline-hours-door: 48
+    auto-receipt-confirm-hours: 168
+    mock-payment-enabled: true
+    scheduler-interval-ms: 60000

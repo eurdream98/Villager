@@ -27,18 +27,21 @@ public class AppointmentService {
   private final MessageService messageService;
   private final ProfileService profileService;
   private final ChatEventPublisher chatEventPublisher;
+  private final EscrowService escrowService;
 
   public AppointmentService(
       TradeAppointmentRepository appointmentRepository,
       ConversationService conversationService,
       MessageService messageService,
       ProfileService profileService,
-      ChatEventPublisher chatEventPublisher) {
+      ChatEventPublisher chatEventPublisher,
+      EscrowService escrowService) {
     this.appointmentRepository = appointmentRepository;
     this.conversationService = conversationService;
     this.messageService = messageService;
     this.profileService = profileService;
     this.chatEventPublisher = chatEventPublisher;
+    this.escrowService = escrowService;
   }
 
   @Transactional(readOnly = true)
@@ -100,6 +103,7 @@ public class AppointmentService {
     appointmentRepository.save(appointment);
 
     messageService.sendSystem(conversationId, userId, buildConfirmedMessage(appointment));
+    escrowService.onAppointmentConfirmed(conversationId, appointment);
 
     AppointmentDto dto = toDto(appointment);
     chatEventPublisher.publishAppointment(conversationId, dto);
@@ -109,6 +113,7 @@ public class AppointmentService {
   @Transactional
   public void reset(UUID conversationId, UUID userId) {
     conversationService.requireParticipant(conversationId, userId);
+    escrowService.onAppointmentReset(conversationId, userId);
     cancelActive(conversationId);
     chatEventPublisher.publishAppointment(conversationId, null);
   }

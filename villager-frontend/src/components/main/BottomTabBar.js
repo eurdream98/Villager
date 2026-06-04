@@ -1,3 +1,4 @@
+import ChatUnreadBadge from './ChatUnreadBadge';
 import './BottomTabBar.css';
 
 const TABS = [
@@ -7,7 +8,7 @@ const TABS = [
   { id: 'jobs', label: '알바' },
 ];
 
-function BottomTabBar({ activeTab, onTabChange }) {
+function BottomTabBar({ activeTab, onTabChange, chatUnreadTotal = 0 }) {
   return (
     <nav className="bottom-tab-bar" aria-label="메인 메뉴">
       <ul className="bottom-tab-bar__list">
@@ -21,11 +22,16 @@ function BottomTabBar({ activeTab, onTabChange }) {
                 aria-current={isActive ? 'page' : undefined}
                 onClick={() => onTabChange(tab.id)}
               >
-                <span className="bottom-tab-bar__icon" aria-hidden="true">
-                  {tab.id === 'trade' && '↔'}
-                  {tab.id === 'chat' && '💭'}
-                  {tab.id === 'community' && '🏘'}
-                  {tab.id === 'jobs' && '💼'}
+                <span className="bottom-tab-bar__icon-wrap" aria-hidden="true">
+                  <span className="bottom-tab-bar__icon">
+                    {tab.id === 'trade' && '↔'}
+                    {tab.id === 'chat' && '💭'}
+                    {tab.id === 'community' && '🏘'}
+                    {tab.id === 'jobs' && '💼'}
+                  </span>
+                  {tab.id === 'chat' && (
+                    <ChatUnreadBadge count={chatUnreadTotal} className="chat-unread-badge--tab" />
+                  )}
                 </span>
                 <span className="bottom-tab-bar__label">{tab.label}</span>
               </button>

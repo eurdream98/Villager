@@ -8,12 +8,18 @@
       "mainClass": "app.villager.VillagerBackendApplication",
       "projectName": "villager-backend",
       "cwd": "${workspaceFolder}/villager-backend",
-      "vmArgs": "-Dspring.profiles.active=local -Dserver.port=8080",
+      "vmArgs": "-Dspring.profiles.active=local -Dserver.port=8080 -Djava.net.preferIPv6Addresses=true -Djava.net.useSystemProxies=false -DsocksProxyHost= -DsocksProxyPort= -Dhttp.proxyHost= -Dhttps.proxyHost= -Dhttp.nonProxyHosts=*",
       "env": {
         "HOST": "",
         "PORT": "",
         "SERVER_PORT": "",
-        "SERVER_ADDRESS": ""
+        "SERVER_ADDRESS": "",
+        "HTTP_PROXY": "",
+        "HTTPS_PROXY": "",
+        "ALL_PROXY": "",
+        "http_proxy": "",
+        "https_proxy": "",
+        "NO_PROXY": "*"
       }
     }
   ]

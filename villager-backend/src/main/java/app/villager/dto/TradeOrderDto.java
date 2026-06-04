@@ -1,0 +1,36 @@
+package app.villager.dto;
+
+import java.util.UUID;
+
+public record TradeOrderDto(
+    UUID id,
+    UUID conversationId,
+    UUID listingId,
+    UUID buyerId,
+    UUID sellerId,
+    UUID appointmentId,
+    String tradeMethod,
+    int amount,
+    String escrowStatus,
+    String paidAt,
+    String fulfilledAt,
+    String confirmedAt,
+    String releasedAt,
+    String refundedAt,
+    String paymentDeadlineAt,
+    String inspectionDeadlineAt,
+    String receiptConfirmDeadlineAt,
+    String disputedAt,
+    String disputeReason,
+    String disputeDetail,
+    Integer settlementAmount,
+    String pendingSettlementType,
+    Integer pendingSettlementAmount,
+    UUID pendingSettlementBy,
+    String pendingSettlementByName,
+    String pendingSettlementAt,
+    String paymentRef,
+    boolean escrowEnabled,
+    int paymentDeadlineHours,
+    int inspectionDeadlineHours,
+    int autoReceiptConfirmHours) {}

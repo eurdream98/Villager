@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "node ./scripts/start-dev.js",
-    "stop:dev": "kill-port 3000",
+    "stop:dev": "node ./scripts/stop-dev.js",
     "start:ci": "cross-env CI=true react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

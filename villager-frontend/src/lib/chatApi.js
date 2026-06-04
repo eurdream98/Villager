@@ -10,6 +10,11 @@ export async function fetchConversation(conversationId) {
   return mapConversation(data);
 }
 
+export async function fetchListingConversations(listingId) {
+  const data = await apiFetch(`/api/v1/listings/${listingId}/conversations`);
+  return (data ?? []).map(mapConversationSummary);
+}
+
 export async function fetchListingTradeStatus(listingId) {
   const data = await apiFetch(`/api/v1/me/listings/${listingId}/trade-status`);
   return {
@@ -20,9 +25,10 @@ export async function fetchListingTradeStatus(listingId) {
 }
 
 export async function startConversation(listingId) {
-  return apiFetch(`/api/v1/listings/${listingId}/conversations`, {
+  const data = await apiFetch(`/api/v1/listings/${listingId}/conversations`, {
     method: 'POST',
   });
+  return mapConversation(data);
 }
 
 export async function fetchMessages(conversationId) {
@@ -89,7 +95,19 @@ function mapConversationSummary(c) {
     appointmentStatus: c.appointmentStatus ?? 'none',
     lastMessagePreview: c.lastMessagePreview ?? '',
     updatedAt: c.updatedAt ?? '',
+    unreadCount: c.unreadCount ?? 0,
   };
+}
+
+export async function markConversationRead(conversationId) {
+  return apiFetch(`/api/v1/conversations/${conversationId}/read`, {
+    method: 'POST',
+  });
+}
+
+/** 탭 배지용: 읽지 않은 메시지 합계 */
+export function sumUnreadMessages(conversations) {
+  return (conversations ?? []).reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);
 }
 
 function mapConversation(c) {

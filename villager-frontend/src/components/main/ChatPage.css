@@ -116,6 +116,10 @@
   margin-bottom: 0.2rem;
 }
 
+.chat-room-card__top .chat-unread-badge--room {
+  margin-left: auto;
+}
+
 .chat-room-card__role {
   font-size: 0.68rem;
   font-weight: 700;

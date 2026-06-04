@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { signOut } from '../lib/auth';
 import GrowthContributionScreen from './growth/GrowthContributionScreen';
 import NeighborhoodTreeMapScreen from './growth/NeighborhoodTreeMapScreen';
+import { useChatUnread } from '../hooks/useChatUnread';
 import { useGrowthStats } from '../hooks/useGrowthStats';
 import { useMemberProfile } from '../hooks/useMemberProfile';
 import BottomTabBar from './main/BottomTabBar';
@@ -24,12 +25,15 @@ function HomeScreen({ user }) {
     loading: growthLoading,
     error: growthError,
   } = useGrowthStats(user?.id);
+  const { unreadTotal, refreshChatUnread } = useChatUnread(!!user);
 
   const renderTabPage = () => {
     if (activeTab === 'trade') {
       return <TradePage user={user} member={member} />;
     }
-    if (activeTab === 'chat') return <ChatPage user={user} />;
+    if (activeTab === 'chat') {
+      return <ChatPage user={user} onUnreadChange={refreshChatUnread} />;
+    }
     if (activeTab === 'community') return <CommunityPage />;
     if (activeTab === 'jobs') return <JobsPage />;
     return <TradePage user={user} member={member} />;
@@ -68,7 +72,11 @@ function HomeScreen({ user }) {
       </main>
 
       {overlay === null && (
-        <BottomTabBar activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomTabBar
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          chatUnreadTotal={unreadTotal}
+        />
       )}
 
       {overlay === 'growth' && (

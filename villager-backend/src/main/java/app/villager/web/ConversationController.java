@@ -39,4 +39,9 @@ public class ConversationController {
   ConversationDto get(Authentication auth, @PathVariable UUID conversationId) {
     return conversationService.get(conversationId, currentUser.requireUserId(auth));
   }
+
+  @PostMapping("/conversations/{conversationId}/read")
+  void markRead(Authentication auth, @PathVariable UUID conversationId) {
+    conversationService.markRead(conversationId, currentUser.requireUserId(auth));
+  }
 }

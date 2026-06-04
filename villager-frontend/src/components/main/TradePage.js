@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { isApiEnabled } from '../../lib/api';
 import {
   fetchConversation,
+  fetchListingConversations,
   fetchListingTradeStatus,
+  sendMessage,
   startConversation,
 } from '../../lib/chatApi';
 import { useTradeListings } from '../../hooks/useTradeListings';
@@ -20,6 +22,12 @@ function TradePage({ user, member }) {
   const [chatError, setChatError] = useState(null);
   const [tradeStatus, setTradeStatus] = useState(null);
   const [tradeStatusLoading, setTradeStatusLoading] = useState(false);
+  const [listingConversations, setListingConversations] = useState([]);
+  const [listingConversationsLoading, setListingConversationsLoading] =
+    useState(false);
+  const [buyerConversationId, setBuyerConversationId] = useState(null);
+  const [buyerPeerName, setBuyerPeerName] = useState('판매자');
+  const [buyerChatLoading, setBuyerChatLoading] = useState(false);
   const { listings, loading, error, addListing, reload } = useTradeListings();
 
   useEffect(() => {
@@ -44,6 +52,62 @@ function TradePage({ user, member }) {
     };
   }, [view, selectedListing?.id]);
 
+  useEffect(() => {
+    if (view !== 'detail' || !selectedListing?.id || !isApiEnabled()) {
+      setListingConversations([]);
+      setBuyerConversationId(null);
+      setBuyerChatLoading(false);
+      return;
+    }
+
+    const isOwnListing =
+      user?.id && selectedListing.sellerId && user.id === selectedListing.sellerId;
+    let cancelled = false;
+    setListingConversationsLoading(true);
+    if (!isOwnListing) setBuyerChatLoading(true);
+
+    const load = async () => {
+      try {
+        const convs = await fetchListingConversations(selectedListing.id);
+        if (cancelled) return;
+
+        if (isOwnListing) {
+          setListingConversations(convs);
+          setBuyerConversationId(null);
+          return;
+        }
+
+        setListingConversations([]);
+        const mine =
+          convs.find((c) => c.role === 'buyer') ??
+          convs.find((c) => c.buyerId === user?.id);
+
+        if (mine?.lastMessagePreview) {
+          setBuyerConversationId(mine.id);
+          setBuyerPeerName(mine.peerName || selectedListing.sellerName || '판매자');
+        } else {
+          setBuyerConversationId(null);
+          setBuyerPeerName(selectedListing.sellerName || '판매자');
+        }
+      } catch {
+        if (!cancelled) {
+          setListingConversations([]);
+          setBuyerConversationId(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setListingConversationsLoading(false);
+          setBuyerChatLoading(false);
+        }
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [view, selectedListing?.id, selectedListing?.sellerId, user?.id]);
+
   const handleSellSubmit = async (form) => {
     await addListing(form);
   };
@@ -54,18 +118,25 @@ function TradePage({ user, member }) {
     setView('chat');
   };
 
-  const handleOpenChat = async () => {
+  const handleOpenListingChat = async (convSummary) => {
     setChatError(null);
-    if (!isApiEnabled()) {
-      setChatError('백엔드 API(REACT_APP_API_URL)가 설정되지 않았습니다.');
-      return;
-    }
     try {
-      const conv = await startConversation(selectedListing.id);
+      const conv = await fetchConversation(convSummary.id);
       openChatWithConversation(conv);
     } catch (err) {
-      setChatError(err.message || '채팅을 시작할 수 없습니다.');
+      setChatError(err.message || '채팅을 열 수 없습니다.');
     }
+  };
+
+  const handleBuyerFirstMessage = async (text) => {
+    if (!selectedListing?.id || !isApiEnabled()) {
+      throw new Error('백엔드 API가 설정되지 않았습니다.');
+    }
+    setChatError(null);
+    const conv = await startConversation(selectedListing.id);
+    await sendMessage(conv.id, text);
+    setBuyerConversationId(conv.id);
+    setBuyerPeerName(conv.peerName || selectedListing.sellerName || '판매자');
   };
 
   const handleOpenExistingChat = async () => {
@@ -87,6 +158,7 @@ function TradePage({ user, member }) {
   if (view === 'sell') {
     return (
       <TradeSellScreen
+        user={user}
         onClose={() => setView('list')}
         onSubmit={handleSellSubmit}
       />
@@ -133,14 +205,22 @@ function TradePage({ user, member }) {
           onOpenExistingChat={
             tradeStatus?.conversationId ? handleOpenExistingChat : null
           }
+          listingConversations={listingConversations}
+          listingConversationsLoading={listingConversationsLoading}
+          onOpenListingChat={handleOpenListingChat}
+          buyerConversationId={buyerConversationId}
+          buyerPeerName={buyerPeerName}
+          buyerChatLoading={buyerChatLoading}
+          onBuyerFirstMessage={handleBuyerFirstMessage}
           onBack={() => {
             setView('list');
             setSelectedListing(null);
             setConversationId(null);
             setChatError(null);
             setTradeStatus(null);
+            setListingConversations([]);
+            setBuyerConversationId(null);
           }}
-          onChat={handleOpenChat}
         />
       </>
     );
@@ -177,6 +257,8 @@ function TradePage({ user, member }) {
                     setSelectedListing(listing);
                     setConversationId(null);
                     setChatError(null);
+                    setListingConversations([]);
+                    setBuyerConversationId(null);
                     setView('detail');
                   }}
                 />

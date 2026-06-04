@@ -7,6 +7,7 @@ import {
   resetAppointment as resetAppointmentApi,
   sendMessage as sendMessageApi,
 } from '../lib/chatApi';
+import { fetchOrder } from '../lib/escrowApi';
 import { isApiEnabled } from '../lib/api';
 
 const POLL_MS = 2500;
@@ -14,17 +15,20 @@ const POLL_MS = 2500;
 export function useTradeChat(conversationId) {
   const [messages, setMessages] = useState([]);
   const [appointment, setAppointment] = useState(null);
+  const [order, setOrder] = useState(null);
   const [status, setStatus] = useState('idle');
 
   const refresh = useCallback(async () => {
     if (!conversationId || !isApiEnabled()) return;
     try {
-      const [msgs, apt] = await Promise.all([
+      const [msgs, apt, ord] = await Promise.all([
         fetchMessages(conversationId),
         fetchAppointment(conversationId),
+        fetchOrder(conversationId),
       ]);
       setMessages(msgs);
       setAppointment(apt);
+      setOrder(ord);
       setStatus('connected');
     } catch {
       setStatus('error');
@@ -35,6 +39,7 @@ export function useTradeChat(conversationId) {
     if (!conversationId) {
       setMessages([]);
       setAppointment(null);
+      setOrder(null);
       setStatus('idle');
       return undefined;
     }
@@ -89,10 +94,12 @@ export function useTradeChat(conversationId) {
   return {
     messages,
     appointment,
+    order,
     status,
     sendMessage,
     proposeAppointment,
     confirmAppointment,
     resetAppointment,
+    refresh,
   };
 }

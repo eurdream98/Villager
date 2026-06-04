@@ -39,10 +39,10 @@ export const TRADE_METHODS = [
     id: 'meet',
     label: '만나서 직접 거래',
     description: '직접 만나서 물건을 전달하는 방식',
-    escrowLevel: ESCROW_LEVEL.PARTIAL,
-    escrowLabel: '에스크로 선택',
+    escrowLevel: ESCROW_LEVEL.NONE,
+    escrowLabel: '현장 결제',
     escrowDetail:
-      '기본은 직거래·현장 결제. 원하면 사전 결제 에스크로(만남 후 구매 확정)를 선택할 수 있습니다. 현금 거래는 에스크로 미적용.',
+      '만나서 물건을 확인한 뒤 현장에서 직접 결제합니다. 에스크로는 택배·문고리 거래에만 제공됩니다.',
     supportsPaid: true,
     supportsFree: true,
   },

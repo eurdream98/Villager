@@ -94,6 +94,9 @@ public class ConversationService {
   public List<ConversationSummaryDto> listForUser(UUID userId) {
     List<TradeConversation> conversations =
         conversationRepository.findByBuyerIdOrSellerIdOrderByUpdatedAtDesc(userId, userId);
+    conversations = conversations.stream()
+        .filter(c -> messageRepository.existsByConversationId(c.getId()))
+        .toList();
     if (conversations.isEmpty()) {
       return List.of();
     }
@@ -132,22 +135,92 @@ public class ConversationService {
           .map(this::messagePreview)
           .orElse("");
 
-      result.add(new ConversationSummaryDto(
-          c.getId(),
-          c.getListingId(),
+      result.add(toSummaryDto(
+          c,
+          userId,
           listingTitle,
           firstImageByListing.getOrDefault(c.getListingId(), ""),
           price,
           isFree,
           neighborhood,
-          c.getBuyerId(),
-          c.getSellerId(),
-          role,
-          profileService.displayName(peerId),
           peerId,
+          role,
           appointmentStatusByConversation.getOrDefault(c.getId(), "none"),
-          lastPreview,
-          TimeFormatUtil.relative(c.getUpdatedAt())));
+          lastPreview));
+    }
+    return result;
+  }
+
+  @Transactional
+  public void markRead(UUID conversationId, UUID userId) {
+    TradeConversation conversation = requireParticipant(conversationId, userId);
+    Instant now = Instant.now();
+    if (conversation.getBuyerId().equals(userId)) {
+      conversation.setBuyerLastReadAt(now);
+    } else {
+      conversation.setSellerLastReadAt(now);
+    }
+    conversationRepository.save(conversation);
+  }
+
+  @Transactional(readOnly = true)
+  public List<ConversationSummaryDto> listByListing(UUID listingId, UUID userId) {
+    TradeListing listing = listingRepository.findById(listingId)
+        .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."));
+
+    List<TradeConversation> conversations;
+    if (listing.getSellerId().equals(userId)) {
+      conversations = conversationRepository.findByListingIdOrderByUpdatedAtDesc(listingId);
+    } else {
+      conversations = conversationRepository
+          .findByListingIdAndBuyerId(listingId, userId)
+          .map(List::of)
+          .orElse(List.of());
+    }
+
+    conversations = conversations.stream()
+        .filter(c -> messageRepository.existsByConversationId(c.getId()))
+        .toList();
+
+    if (conversations.isEmpty()) {
+      return List.of();
+    }
+
+    String listingTitle = listing.getTitle();
+    String neighborhood = listing.getNeighborhood() != null ? listing.getNeighborhood() : "";
+    int price = listing.isFree() ? 0 : listing.getPrice();
+    boolean isFree = listing.isFree();
+    String firstImage = imageRepository.findByListingIdOrderBySortOrderAsc(listingId).stream()
+        .findFirst()
+        .map(TradeListingImage::getPublicUrl)
+        .orElse("");
+
+    List<UUID> conversationIds = conversations.stream().map(TradeConversation::getId).toList();
+    Map<UUID, String> appointmentStatusByConversation =
+        loadAppointmentStatusByConversation(conversationIds);
+
+    List<ConversationSummaryDto> result = new ArrayList<>();
+    for (TradeConversation c : conversations) {
+      boolean isBuyer = c.getBuyerId().equals(userId);
+      UUID peerId = isBuyer ? c.getSellerId() : c.getBuyerId();
+      String role = isBuyer ? "buyer" : "seller";
+      String lastPreview = messageRepository
+          .findFirstByConversationIdOrderByCreatedAtDesc(c.getId())
+          .map(this::messagePreview)
+          .orElse("");
+
+      result.add(toSummaryDto(
+          c,
+          userId,
+          listingTitle,
+          firstImage,
+          price,
+          isFree,
+          neighborhood,
+          peerId,
+          role,
+          appointmentStatusByConversation.getOrDefault(c.getId(), "none"),
+          lastPreview));
     }
     return result;
   }
@@ -220,6 +293,52 @@ public class ConversationService {
       result.putIfAbsent(apt.getConversationId(), apt.getStatus().name());
     }
     return result;
+  }
+
+  private ConversationSummaryDto toSummaryDto(
+      TradeConversation c,
+      UUID userId,
+      String listingTitle,
+      String listingImageUrl,
+      int listingPrice,
+      boolean listingFree,
+      String neighborhood,
+      UUID peerId,
+      String role,
+      String appointmentStatus,
+      String lastPreview) {
+    return new ConversationSummaryDto(
+        c.getId(),
+        c.getListingId(),
+        listingTitle,
+        listingImageUrl,
+        listingPrice,
+        listingFree,
+        neighborhood,
+        c.getBuyerId(),
+        c.getSellerId(),
+        role,
+        profileService.displayName(peerId),
+        peerId,
+        appointmentStatus,
+        lastPreview,
+        TimeFormatUtil.relative(c.getUpdatedAt()),
+        countUnread(c, userId));
+  }
+
+  private int countUnread(TradeConversation conversation, UUID userId) {
+    Instant lastRead = conversation.getBuyerId().equals(userId)
+        ? conversation.getBuyerLastReadAt()
+        : conversation.getSellerLastReadAt();
+    if (lastRead == null) {
+      lastRead = Instant.EPOCH;
+    }
+    long unread = messageRepository.countByConversationIdAndSenderIdNotAndSystemFalseAndCreatedAtAfter(
+        conversation.getId(), userId, lastRead);
+    if (unread > 99) {
+      return 99;
+    }
+    return (int) unread;
   }
 
   private String messagePreview(TradeMessage message) {

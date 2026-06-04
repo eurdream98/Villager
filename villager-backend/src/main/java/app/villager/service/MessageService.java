@@ -58,6 +58,11 @@ public class MessageService {
     messageRepository.save(message);
 
     conversation.setUpdatedAt(Instant.now());
+    if (conversation.getBuyerId().equals(senderId)) {
+      conversation.setBuyerLastReadAt(Instant.now());
+    } else {
+      conversation.setSellerLastReadAt(Instant.now());
+    }
     conversationRepository.save(conversation);
 
     MessageDto dto = toDto(message);
