@@ -117,7 +117,7 @@ export function formatCountdown(iso, { expiredLabel = '00:00:00' } = {}) {
   return clock;
 }
 
-function mapOrder(row) {
+export function mapOrder(row) {
   return {
     id: row.id,
     conversationId: row.conversationId,

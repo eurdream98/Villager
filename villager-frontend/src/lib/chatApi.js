@@ -122,9 +122,10 @@ function mapConversation(c) {
   };
 }
 
-function mapMessage(msg) {
+export function mapMessage(msg) {
   return {
     id: msg.id,
+    conversationId: msg.conversationId,
     userId: msg.userId,
     userName: msg.userName,
     text: msg.text,
@@ -133,7 +134,7 @@ function mapMessage(msg) {
   };
 }
 
-function mapAppointment(apt) {
+export function mapAppointment(apt) {
   return {
     id: apt.id,
     roomId: apt.conversationId,

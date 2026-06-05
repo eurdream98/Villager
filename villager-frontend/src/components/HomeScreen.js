@@ -25,7 +25,7 @@ function HomeScreen({ user }) {
     loading: growthLoading,
     error: growthError,
   } = useGrowthStats(user?.id);
-  const { unreadTotal, refreshChatUnread } = useChatUnread(!!user);
+  const { unreadTotal, refreshChatUnread } = useChatUnread(!!user, user?.id);
 
   const renderTabPage = () => {
     if (activeTab === 'trade') {
