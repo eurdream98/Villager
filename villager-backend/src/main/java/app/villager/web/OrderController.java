@@ -1,6 +1,8 @@
 package app.villager.web;
 
+import app.villager.dto.ConfirmPaymentRequest;
 import app.villager.dto.OpenDisputeRequest;
+import app.villager.dto.PaymentPrepareDto;
 import app.villager.dto.ProposeSettlementRequest;
 import app.villager.dto.TradeOrderDto;
 import app.villager.security.CurrentUser;
@@ -32,6 +34,27 @@ public class OrderController {
     return escrowService.getOrder(conversationId, currentUser.requireUserId(auth));
   }
 
+  /** 결제창 준비 — mode=toss 이면 프론트에서 토스 SDK 호출 */
+  @PostMapping("/payment/prepare")
+  PaymentPrepareDto preparePayment(Authentication auth, @PathVariable UUID conversationId) {
+    return escrowService.preparePayment(conversationId, currentUser.requireUserId(auth));
+  }
+
+  /** 토스 successUrl 리다이렉트 후 최종 승인 */
+  @PostMapping("/payment/confirm")
+  TradeOrderDto confirmPayment(
+      Authentication auth,
+      @PathVariable UUID conversationId,
+      @Valid @RequestBody ConfirmPaymentRequest request) {
+    return escrowService.confirmPayment(
+        conversationId,
+        currentUser.requireUserId(auth),
+        request.paymentKey(),
+        request.orderId(),
+        request.amount());
+  }
+
+  /** mock 즉시 결제 (개발용) */
   @PostMapping("/pay")
   TradeOrderDto pay(Authentication auth, @PathVariable UUID conversationId) {
     return escrowService.pay(conversationId, currentUser.requireUserId(auth));

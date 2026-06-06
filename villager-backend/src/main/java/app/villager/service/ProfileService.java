@@ -3,6 +3,9 @@ package app.villager.service;
 import app.villager.domain.Profile;
 import app.villager.dto.ProfileDto;
 import app.villager.repository.ProfileRepository;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,9 +28,18 @@ public class ProfileService {
   }
 
   public String displayName(UUID userId) {
-    return profileRepository.findById(userId)
-        .map(p -> firstNonBlank(p.getDisplayName(), p.getNickname(), "이웃"))
-        .orElse("이웃");
+    return displayNames(java.util.List.of(userId)).getOrDefault(userId, "이웃");
+  }
+
+  public Map<UUID, String> displayNames(Collection<UUID> userIds) {
+    if (userIds == null || userIds.isEmpty()) {
+      return Map.of();
+    }
+    Map<UUID, String> result = new HashMap<>();
+    profileRepository.findAllById(userIds).forEach(profile -> result.put(
+        profile.getId(),
+        firstNonBlank(profile.getDisplayName(), profile.getNickname(), "이웃")));
+    return result;
   }
 
   public static ProfileDto toDto(Profile profile) {

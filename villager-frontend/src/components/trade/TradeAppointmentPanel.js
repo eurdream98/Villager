@@ -6,6 +6,7 @@ import {
   validateAppointmentDraft,
 } from '../../lib/appointment';
 import { TRADE_METHODS } from '../../lib/trade';
+import { isSameUser } from '../../lib/userId';
 import './Trade.css';
 
 function TradeAppointmentPanel({
@@ -101,8 +102,9 @@ function TradeAppointmentPanel({
 
   if (appointment?.status === APPOINTMENT_STATUS.PENDING) {
     const summary = formatAppointmentSummary(appointment);
-    const isProposer = appointment.proposedBy === currentUserId;
+    const isProposer = isSameUser(appointment.proposedBy, currentUserId);
     const canConfirm = !isProposer;
+    const peerRole = isSeller ? '구매자' : '판매자';
 
     return (
       <div className="trade-apt trade-apt--pending">
@@ -122,10 +124,17 @@ function TradeAppointmentPanel({
           </div>
         </dl>
         <p className="trade-apt__hint">
-          {appointment.proposedByName}님이 제안 ·{' '}
-          {isProposer
-            ? '상대방의 확정을 기다리는 중입니다.'
-            : `${roleLabel}님, 내용을 확인하고 약속을 수락해 주세요.`}
+          {isProposer ? (
+            <>
+              내가 제안한 약속입니다. <strong>{peerRole}</strong>가 「약속 수락」을 누르면
+              확정됩니다. (본인은 수락할 수 없습니다.)
+            </>
+          ) : (
+            <>
+              {appointment.proposedByName}님이 제안 · {roleLabel}님, 내용을 확인하고
+              「약속 수락」을 눌러 주세요.
+            </>
+          )}
         </p>
         {error && (
           <p className="trade-apt__error" role="alert">
@@ -143,7 +152,7 @@ function TradeAppointmentPanel({
             </button>
           )}
           <button type="button" className="trade-apt__btn" onClick={onReset}>
-            다시 제안
+            {isProposer ? '제안 취소하고 다시 잡기' : '거절하고 다시 제안'}
           </button>
         </div>
       </div>

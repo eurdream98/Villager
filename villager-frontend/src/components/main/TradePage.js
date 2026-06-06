@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { resolveListingImageUrl } from '../../lib/listingImages';
 import { isApiEnabled } from '../../lib/api';
 import {
   fetchConversation,
@@ -8,7 +9,7 @@ import {
   startConversation,
 } from '../../lib/chatApi';
 import { useTradeListings } from '../../hooks/useTradeListings';
-import TradeChatScreen from '../trade/TradeChatScreen';
+import ChatOverlay from '../trade/ChatOverlay';
 import TradeDetailScreen from '../trade/TradeDetailScreen';
 import TradeListingCard from '../trade/TradeListingCard';
 import TradeSellScreen from '../trade/TradeSellScreen';
@@ -169,14 +170,14 @@ function TradePage({ user, member }) {
     const isSeller = user.id === selectedListing.sellerId;
     const tradeInfo = {
       listingTitle: selectedListing.title,
-      listingImageUrl: selectedListing.imageUrls?.[0] ?? '',
+      listingImageUrl: resolveListingImageUrl(selectedListing.imageUrls?.[0] ?? ''),
       listingPrice: selectedListing.price,
       listingFree: selectedListing.isFree,
       neighborhood: selectedListing.neighborhood,
       role: isSeller ? 'seller' : 'buyer',
     };
     return (
-      <TradeChatScreen
+      <ChatOverlay
         tradeInfo={tradeInfo}
         listingTitle={selectedListing.title}
         peerName={chatPeerName}

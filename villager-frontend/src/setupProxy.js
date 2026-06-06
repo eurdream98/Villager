@@ -19,4 +19,11 @@ module.exports = function setupProxy(app) {
       ws: true,
     }),
   );
+  app.use(
+    '/uploads',
+    createProxyMiddleware({
+      target: proxyTarget,
+      changeOrigin: true,
+    }),
+  );
 };

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { markConversationRead } from '../../lib/chatApi';
 import { useTradeChat } from '../../hooks/useTradeChat';
+import { resolveListingImageUrl } from '../../lib/listingImages';
 import { formatPrice } from '../../lib/trade';
 import TradeAppointmentPanel from './TradeAppointmentPanel';
 import TradeEscrowPanel from './TradeEscrowPanel';
@@ -117,7 +118,7 @@ function TradeChatScreen({
         {tradeInfo?.listingImageUrl ? (
           <img
             className="trade-chat__trade-thumb"
-            src={tradeInfo.listingImageUrl}
+            src={resolveListingImageUrl(tradeInfo?.listingImageUrl)}
             alt=""
           />
         ) : (

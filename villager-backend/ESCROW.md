@@ -50,7 +50,59 @@ villager:
     scheduler-interval-ms: 60000
 ```
 
-## 실제 PG 연동 (권장 플랫폼)
+## 실제 PG 연동 (토스페이먼츠)
+
+### 결제 흐름 (택배·문고리)
+
+```
+1. 약속 확정 → EscrowService.onAppointmentConfirmed → pending_payment
+2. 구매자 [결제하기]
+     → POST .../order/payment/prepare  (preparePayment)
+     → 프론트 토스 SDK requestPayment (리다이렉트)
+3. successUrl 복귀 (?paymentKey&orderId&amount)
+     → App.js → POST .../order/payment/confirm  (confirmPayment)
+     → TossPaymentsClient.confirm → paid_held
+4. 이후 fulfill → confirmReceipt → complete / dispute (기존과 동일)
+5. 환불 시 refundOrder / partialSettle → TossPaymentsClient.cancel
+```
+
+### API (추가)
+
+| Method | Path | 설명 |
+|--------|------|------|
+| POST | `.../order/payment/prepare` | 결제창 정보 (clientKey, orderId, amount) |
+| POST | `.../order/payment/confirm` | 토스 승인 후 paid_held |
+| POST | `.../order/pay` | mock 즉시 결제 (개발용) |
+
+### 설정
+
+```yaml
+villager:
+  escrow:
+    mock-payment-enabled: true   # mock /pay 허용
+  toss:
+    enabled: true
+    client-key: test_ck_...
+    secret-key: test_sk_...
+    success-url: http://localhost:3000
+    fail-url: http://localhost:3000
+```
+
+환경 변수: `TOSS_ENABLED`, `TOSS_CLIENT_KEY`, `TOSS_SECRET_KEY`, `TOSS_SUCCESS_URL`, `TOSS_FAIL_URL`
+
+- **mock만**: `toss.enabled=false` + `mock-payment-enabled=true` (기본)
+- **토스 테스트**: [토스 개발자센터](https://developers.tosspayments.com/) 테스트 키 발급
+
+### 코드 위치
+
+| 역할 | 파일 |
+|------|------|
+| 결제 준비·승인·환불 | `EscrowService`, `TossPaymentsClient` |
+| REST | `OrderController` |
+| 토스 SDK | `villager-frontend/src/lib/tossPayments.js` |
+| 리다이렉트 승인 | `App.js` |
+
+## 실제 PG 연동 (권장 플랫폼 — 참고)
 
 한국 C2C·마켓플레이스에 많이 쓰는 선택지:
 

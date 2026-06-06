@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>결제 실패</title>
+  </head>
+  <body>
+    <p>결제 페이지로 돌아가는 중…</p>
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var payload = {
+          toss: 'fail',
+          code: params.get('code'),
+          message: params.get('message'),
+          conversationId: params.get('conversationId'),
+        };
+        try {
+          sessionStorage.setItem('villager_toss_return', JSON.stringify(payload));
+        } catch (e) {}
+        window.location.replace('/');
+      })();
+    </script>
+  </body>
+</html>

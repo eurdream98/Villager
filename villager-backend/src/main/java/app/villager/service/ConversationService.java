@@ -18,8 +18,10 @@ import app.villager.util.TimeFormatUtil;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -94,15 +96,22 @@ public class ConversationService {
   public List<ConversationSummaryDto> listForUser(UUID userId) {
     List<TradeConversation> conversations =
         conversationRepository.findByBuyerIdOrSellerIdOrderByUpdatedAtDesc(userId, userId);
+    if (conversations.isEmpty()) {
+      return List.of();
+    }
+
+    List<UUID> conversationIds = conversations.stream().map(TradeConversation::getId).toList();
+    Set<UUID> withMessages = new HashSet<>(
+        messageRepository.findDistinctConversationIds(conversationIds));
     conversations = conversations.stream()
-        .filter(c -> messageRepository.existsByConversationId(c.getId()))
+        .filter(c -> withMessages.contains(c.getId()))
         .toList();
     if (conversations.isEmpty()) {
       return List.of();
     }
 
+    conversationIds = conversations.stream().map(TradeConversation::getId).toList();
     List<UUID> listingIds = conversations.stream().map(TradeConversation::getListingId).distinct().toList();
-    List<UUID> conversationIds = conversations.stream().map(TradeConversation::getId).toList();
 
     Map<UUID, TradeListing> listingsById = listingRepository.findAllById(listingIds).stream()
         .collect(Collectors.toMap(TradeListing::getId, Function.identity()));
@@ -115,6 +124,18 @@ public class ConversationService {
             (a, b) -> a));
 
     Map<UUID, String> appointmentStatusByConversation = loadAppointmentStatusByConversation(conversationIds);
+
+    Map<UUID, String> lastPreviewByConversation = messageRepository
+        .findLatestByConversationIdIn(conversationIds).stream()
+        .collect(Collectors.toMap(
+            TradeMessage::getConversationId,
+            this::messagePreview,
+            (a, b) -> a));
+
+    Set<UUID> peerIds = conversations.stream()
+        .map(c -> c.getBuyerId().equals(userId) ? c.getSellerId() : c.getBuyerId())
+        .collect(Collectors.toSet());
+    Map<UUID, String> peerNamesById = profileService.displayNames(peerIds);
 
     List<ConversationSummaryDto> result = new ArrayList<>();
     for (TradeConversation c : conversations) {
@@ -130,11 +151,6 @@ public class ConversationService {
       UUID peerId = isBuyer ? c.getSellerId() : c.getBuyerId();
       String role = isBuyer ? "buyer" : "seller";
 
-      String lastPreview = messageRepository
-          .findFirstByConversationIdOrderByCreatedAtDesc(c.getId())
-          .map(this::messagePreview)
-          .orElse("");
-
       result.add(toSummaryDto(
           c,
           userId,
@@ -146,7 +162,8 @@ public class ConversationService {
           peerId,
           role,
           appointmentStatusByConversation.getOrDefault(c.getId(), "none"),
-          lastPreview));
+          lastPreviewByConversation.getOrDefault(c.getId(), ""),
+          peerNamesById.getOrDefault(peerId, "이웃")));
     }
     return result;
   }
@@ -178,8 +195,15 @@ public class ConversationService {
           .orElse(List.of());
     }
 
+    if (conversations.isEmpty()) {
+      return List.of();
+    }
+
+    List<UUID> allConversationIds = conversations.stream().map(TradeConversation::getId).toList();
+    Set<UUID> withMessages = new HashSet<>(
+        messageRepository.findDistinctConversationIds(allConversationIds));
     conversations = conversations.stream()
-        .filter(c -> messageRepository.existsByConversationId(c.getId()))
+        .filter(c -> withMessages.contains(c.getId()))
         .toList();
 
     if (conversations.isEmpty()) {
@@ -198,16 +222,22 @@ public class ConversationService {
     List<UUID> conversationIds = conversations.stream().map(TradeConversation::getId).toList();
     Map<UUID, String> appointmentStatusByConversation =
         loadAppointmentStatusByConversation(conversationIds);
+    Map<UUID, String> lastPreviewByConversation = messageRepository
+        .findLatestByConversationIdIn(conversationIds).stream()
+        .collect(Collectors.toMap(
+            TradeMessage::getConversationId,
+            this::messagePreview,
+            (a, b) -> a));
+    Set<UUID> peerIds = conversations.stream()
+        .map(c -> c.getBuyerId().equals(userId) ? c.getSellerId() : c.getBuyerId())
+        .collect(Collectors.toSet());
+    Map<UUID, String> peerNamesById = profileService.displayNames(peerIds);
 
     List<ConversationSummaryDto> result = new ArrayList<>();
     for (TradeConversation c : conversations) {
       boolean isBuyer = c.getBuyerId().equals(userId);
       UUID peerId = isBuyer ? c.getSellerId() : c.getBuyerId();
       String role = isBuyer ? "buyer" : "seller";
-      String lastPreview = messageRepository
-          .findFirstByConversationIdOrderByCreatedAtDesc(c.getId())
-          .map(this::messagePreview)
-          .orElse("");
 
       result.add(toSummaryDto(
           c,
@@ -220,7 +250,8 @@ public class ConversationService {
           peerId,
           role,
           appointmentStatusByConversation.getOrDefault(c.getId(), "none"),
-          lastPreview));
+          lastPreviewByConversation.getOrDefault(c.getId(), ""),
+          peerNamesById.getOrDefault(peerId, "이웃")));
     }
     return result;
   }
@@ -306,7 +337,8 @@ public class ConversationService {
       UUID peerId,
       String role,
       String appointmentStatus,
-      String lastPreview) {
+      String lastPreview,
+      String peerName) {
     return new ConversationSummaryDto(
         c.getId(),
         c.getListingId(),
@@ -318,7 +350,7 @@ public class ConversationService {
         c.getBuyerId(),
         c.getSellerId(),
         role,
-        profileService.displayName(peerId),
+        peerName,
         peerId,
         appointmentStatus,
         lastPreview,

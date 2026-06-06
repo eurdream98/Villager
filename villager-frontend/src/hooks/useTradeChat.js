@@ -111,19 +111,25 @@ export function useTradeChat(conversationId) {
   const proposeAppointment = useCallback(
     async (draft) => {
       if (!conversationId) return;
-      await proposeAppointmentApi(conversationId, draft);
+      const apt = await proposeAppointmentApi(conversationId, draft);
+      setAppointment(apt);
     },
     [conversationId],
   );
 
   const confirmAppointment = useCallback(async () => {
     if (!conversationId) return;
-    await confirmAppointmentApi(conversationId);
+    const apt = await confirmAppointmentApi(conversationId);
+    setAppointment(apt);
+    const ord = await fetchOrder(conversationId);
+    setOrder(ord);
   }, [conversationId]);
 
   const resetAppointment = useCallback(async () => {
     if (!conversationId) return;
     await resetAppointmentApi(conversationId);
+    setAppointment(null);
+    setOrder(null);
   }, [conversationId]);
 
   return {

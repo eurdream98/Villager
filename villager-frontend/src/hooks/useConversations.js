@@ -7,23 +7,32 @@ export function useConversations() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const reload = useCallback(() => {
+  const reload = useCallback((options = {}) => {
+    const silent = Boolean(options.silent);
+
     if (!isApiEnabled()) {
       setConversations([]);
       setError('백엔드 API(REACT_APP_API_URL)가 설정되지 않았습니다.');
       setLoading(false);
-      return;
+      return Promise.resolve();
     }
-    setLoading(true);
+
+    if (!silent) {
+      setLoading(true);
+    }
     setError(null);
-    fetchConversations()
+
+    return fetchConversations()
       .then((data) => {
         setConversations(data);
-        setLoading(false);
       })
       .catch((err) => {
         setError(err.message || '채팅 목록을 불러올 수 없습니다.');
-        setLoading(false);
+      })
+      .finally(() => {
+        if (!silent) {
+          setLoading(false);
+        }
       });
   }, []);
 

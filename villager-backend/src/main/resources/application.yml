@@ -45,5 +45,11 @@ villager:
     inspection-deadline-hours-shipping: 168
     inspection-deadline-hours-door: 48
     auto-receipt-confirm-hours: 168
-    mock-payment-enabled: true
+    mock-payment-enabled: false
     scheduler-interval-ms: 60000
+  toss:
+    enabled: ${TOSS_ENABLED:true}
+    client-key: ${TOSS_CLIENT_KEY:test_ck_DnyRpQWGrNWlQKOy7zkL8Kwv1M9E}
+    secret-key: ${TOSS_SECRET_KEY:test_sk_yZqmkKeP8gJkglq70NKYrbQRxB9l}
+    success-url: ${TOSS_SUCCESS_URL:http://localhost:3000/payment-success.html}
+    fail-url: ${TOSS_FAIL_URL:http://localhost:3000/payment-fail.html}

@@ -30,6 +30,7 @@ public class SecurityConfig {
             .requestMatchers("/actuator/health", "/api/v1/health").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/v1/listings", "/api/v1/listings/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/v1/neighborhoods/**").permitAll()
+            .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
             .requestMatchers("/ws/**").permitAll()
             .anyRequest().authenticated())
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));

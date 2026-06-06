@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>결제 확인 중…</title>
+  </head>
+  <body>
+    <p>결제 확인 중…</p>
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var payload = {
+          toss: 'success',
+          paymentKey: params.get('paymentKey'),
+          orderId: params.get('orderId'),
+          amount: params.get('amount') ? Number(params.get('amount')) : null,
+          conversationId: params.get('conversationId'),
+        };
+        try {
+          sessionStorage.setItem('villager_toss_return', JSON.stringify(payload));
+        } catch (e) {}
+        window.location.replace('/');
+      })();
+    </script>
+  </body>
+</html>

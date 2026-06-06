@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useConversations } from '../../hooks/useConversations';
 import { markConversationRead } from '../../lib/chatApi';
+import { resolveListingImageUrl } from '../../lib/listingImages';
 import { formatPrice } from '../../lib/trade';
-import TradeChatScreen from '../trade/TradeChatScreen';
+import ChatOverlay from '../trade/ChatOverlay';
 import ChatUnreadBadge from './ChatUnreadBadge';
 import '../trade/Trade.css';
 import './ChatPage.css';
@@ -23,7 +24,7 @@ function ChatPage({ user, onUnreadChange }) {
 
   const handleCloseChat = () => {
     setActiveChat(null);
-    reload();
+    reload({ silent: true });
     onUnreadChange?.();
   };
 
@@ -31,21 +32,15 @@ function ChatPage({ user, onUnreadChange }) {
     setActiveChat(conv);
     markConversationRead(conv.id)
       .then(() => {
-        reload();
+        reload({ silent: true });
         onUnreadChange?.();
       })
       .catch(() => {});
   };
 
-  useEffect(() => {
-    if (!activeChat) {
-      onUnreadChange?.();
-    }
-  }, [activeChat, onUnreadChange]);
-
   if (activeChat && user) {
     return (
-      <TradeChatScreen
+      <ChatOverlay
         tradeInfo={activeChat}
         listingTitle={activeChat.listingTitle}
         peerName={activeChat.peerName}
@@ -54,7 +49,7 @@ function ChatPage({ user, onUnreadChange }) {
         sellerId={activeChat.sellerId}
         onBack={handleCloseChat}
         onMarkedRead={() => {
-          reload();
+          reload({ silent: true });
           onUnreadChange?.();
         }}
       />
@@ -97,7 +92,7 @@ function ChatPage({ user, onUnreadChange }) {
                 >
                   <div className="chat-room-card__thumb">
                     {conv.listingImageUrl ? (
-                      <img src={conv.listingImageUrl} alt="" />
+                      <img src={resolveListingImageUrl(conv.listingImageUrl)} alt="" />
                     ) : (
                       <span className="chat-room-card__no-img">사진 없음</span>
                     )}

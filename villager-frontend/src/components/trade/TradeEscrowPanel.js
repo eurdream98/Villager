@@ -12,9 +12,9 @@ import {
   formatDeadline,
   fulfillOrder,
   openDispute,
-  payOrder,
   proposeSettlement,
 } from '../../lib/escrowApi';
+import { startEscrowPayment } from '../../lib/tossPayments';
 import './Trade.css';
 
 const STATUS_STEPS = [
@@ -94,7 +94,14 @@ function TradeEscrowPanel({
     }
   };
 
-  const handlePay = () => run(() => payOrder(order.conversationId));
+  const handlePay = () =>
+    run(async () => {
+      const result = await startEscrowPayment(order.conversationId);
+      if (result === 'redirect') {
+        // 토스 결제창으로 이동 — 이후 App.js에서 confirm 처리
+        return;
+      }
+    });
   const handleFulfill = () => run(() => fulfillOrder(order.conversationId));
   const handleConfirmReceipt = () => run(() => confirmReceipt(order.conversationId));
   const handleComplete = () => run(() => completeOrder(order.conversationId));
@@ -426,6 +433,9 @@ function TradeEscrowPanel({
 
       {order.paymentRef?.startsWith('mock-') && (
         <p className="trade-escrow__mock">개발 모드: mock 결제 (PG 미연동)</p>
+      )}
+      {order.paymentRef && !order.paymentRef.startsWith('mock-') && (
+        <p className="trade-escrow__mock">토스페이먼츠 결제 · {order.paymentRef.slice(0, 12)}…</p>
       )}
     </div>
   );

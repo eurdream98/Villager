@@ -5,6 +5,38 @@ export async function fetchOrder(conversationId) {
   return data ? mapOrder(data) : null;
 }
 
+/** 결제창 준비 — mode: mock | toss */
+export async function preparePayment(conversationId) {
+  const data = await apiFetch(
+    `/api/v1/conversations/${conversationId}/order/payment/prepare`,
+    { method: 'POST' },
+  );
+  return {
+    mode: data.mode,
+    clientKey: data.clientKey,
+    orderId: data.orderId,
+    amount: data.amount,
+    orderName: data.orderName,
+    conversationId: data.conversationId,
+    customerKey: data.customerKey,
+    successUrl: data.successUrl,
+    failUrl: data.failUrl,
+  };
+}
+
+/** 토스 successUrl 리다이렉트 후 서버 승인 */
+export async function confirmPayment(conversationId, { paymentKey, orderId, amount }) {
+  const data = await apiFetch(
+    `/api/v1/conversations/${conversationId}/order/payment/confirm`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ paymentKey, orderId, amount }),
+    },
+  );
+  return mapOrder(data);
+}
+
+/** mock 즉시 결제 (개발용) */
 export async function payOrder(conversationId) {
   const data = await apiFetch(`/api/v1/conversations/${conversationId}/order/pay`, {
     method: 'POST',

@@ -1,7 +1,10 @@
 package app.villager.service;
 
 import app.villager.config.EscrowProperties;
+import app.villager.config.TossPaymentsProperties;
 import app.villager.domain.EscrowStatus;
+import app.villager.dto.PaymentPrepareDto;
+import app.villager.payment.TossPaymentsClient;
 import app.villager.domain.ListingStatus;
 import app.villager.domain.SettlementType;
 import app.villager.domain.TradeAppointment;
@@ -43,6 +46,8 @@ public class EscrowService {
   private final ProfileService profileService;
   private final ChatEventPublisher chatEventPublisher;
   private final EscrowProperties escrowProperties;
+  private final TossPaymentsProperties tossProperties;
+  private final TossPaymentsClient tossPaymentsClient;
   private final XpService xpService;
 
   public EscrowService(
@@ -54,6 +59,8 @@ public class EscrowService {
       ProfileService profileService,
       ChatEventPublisher chatEventPublisher,
       EscrowProperties escrowProperties,
+      TossPaymentsProperties tossProperties,
+      TossPaymentsClient tossPaymentsClient,
       XpService xpService) {
     this.orderRepository = orderRepository;
     this.conversationRepository = conversationRepository;
@@ -63,6 +70,8 @@ public class EscrowService {
     this.profileService = profileService;
     this.chatEventPublisher = chatEventPublisher;
     this.escrowProperties = escrowProperties;
+    this.tossProperties = tossProperties;
+    this.tossPaymentsClient = tossPaymentsClient;
     this.xpService = xpService;
   }
 
@@ -157,34 +166,105 @@ public class EscrowService {
     });
   }
 
+  /** 결제창 띄우기 전: 금액·orderId·리다이렉트 URL 반환 (프론트 → 토스 SDK) */
+  @Transactional(readOnly = true)
+  public PaymentPrepareDto preparePayment(UUID conversationId, UUID userId) {
+    TradeOrder order = requireOrder(conversationId, userId);
+    requireBuyer(order, userId);
+    requireStatus(order, EscrowStatus.pending_payment);
+    assertPaymentNotExpired(order);
+
+    TradeListing listing = listingRepository
+        .findById(order.getListingId())
+        .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."));
+
+    String orderName = truncateOrderName(listing.getTitle());
+    String orderId = order.getId().toString();
+    String successUrl = appendQuery(
+        tossProperties.getSuccessUrl(),
+        "toss=success&conversationId=" + conversationId);
+    String failUrl = appendQuery(
+        tossProperties.getFailUrl(),
+        "toss=fail&conversationId=" + conversationId);
+
+    if (tossProperties.isConfigured()) {
+      return new PaymentPrepareDto(
+          "toss",
+          tossProperties.getClientKey(),
+          orderId,
+          order.getAmount(),
+          orderName,
+          conversationId,
+          userId,
+          successUrl,
+          failUrl);
+    }
+
+    if (!escrowProperties.isMockPaymentEnabled()) {
+      throw new BusinessException(
+          HttpStatus.NOT_IMPLEMENTED,
+          "토스 키 또는 mock-payment-enabled=true 가 필요합니다.");
+    }
+
+    return new PaymentPrepareDto(
+        "mock",
+        null,
+        orderId,
+        order.getAmount(),
+        orderName,
+        conversationId,
+        userId,
+        successUrl,
+        failUrl);
+  }
+
+  /** 토스 결제창 성공 리다이렉트 후 서버에서 최종 승인 → paid_held */
+  @Transactional
+  public TradeOrderDto confirmPayment(
+      UUID conversationId, UUID userId, String paymentKey, String orderId, int amount) {
+    TradeOrder order = requireOrder(conversationId, userId);
+    requireBuyer(order, userId);
+
+    if (order.getEscrowStatus() == EscrowStatus.paid_held
+        && paymentKey.equals(order.getPaymentRef())) {
+      return toDto(order);
+    }
+
+    requireStatus(order, EscrowStatus.pending_payment);
+    assertPaymentNotExpired(order);
+
+    if (!order.getId().toString().equals(orderId)) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "주문 ID가 일치하지 않습니다.");
+    }
+    if (order.getAmount() != amount) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "결제 금액이 일치하지 않습니다.");
+    }
+
+    if (!tossProperties.isConfigured()) {
+      throw new BusinessException(HttpStatus.NOT_IMPLEMENTED, "토스페이먼츠가 설정되지 않았습니다.");
+    }
+
+    var confirmed = tossPaymentsClient.confirm(paymentKey, orderId, amount);
+    applyPaidHeld(order, userId, confirmed.paymentKey());
+    publishOrder(conversationId, order);
+    return toDto(order);
+  }
+
+  /** mock 전용: PG 없이 즉시 paid_held */
   @Transactional
   public TradeOrderDto pay(UUID conversationId, UUID userId) {
     TradeOrder order = requireOrder(conversationId, userId);
     requireBuyer(order, userId);
     requireStatus(order, EscrowStatus.pending_payment);
-
-    if (order.getPaymentDeadlineAt() != null && Instant.now().isAfter(order.getPaymentDeadlineAt())) {
-      throw new BusinessException(HttpStatus.BAD_REQUEST, "결제 기한이 지났습니다. 약속을 다시 잡아 주세요.");
-    }
+    assertPaymentNotExpired(order);
 
     if (!escrowProperties.isMockPaymentEnabled()) {
       throw new BusinessException(
-          HttpStatus.NOT_IMPLEMENTED, "실제 PG 연동 전입니다. villager.escrow.mock-payment-enabled=true 로 개발 모드를 사용하세요.");
+          HttpStatus.NOT_IMPLEMENTED,
+          "mock 결제가 꺼져 있습니다. POST .../payment/prepare 후 토스 결제창을 사용하세요.");
     }
 
-    Instant now = Instant.now();
-    order.setEscrowStatus(EscrowStatus.paid_held);
-    order.setPaidAt(now);
-    order.setPaymentRef("mock-" + UUID.randomUUID());
-    order.setUpdatedAt(now);
-    orderRepository.save(order);
-
-    messageService.sendSystem(
-        conversationId,
-        userId,
-        "✅ 결제 완료 · " + formatWon(order.getAmount()) + "이 에스크로에 보관되었습니다.\n"
-            + "판매자가 " + tradeMethodLabel(order.getTradeMethod()) + " 이행(발송/배치)을 완료하면 알림이 갑니다.");
-
+    applyPaidHeld(order, userId, "mock-" + UUID.randomUUID());
     publishOrder(conversationId, order);
     return toDto(order);
   }
@@ -401,6 +481,7 @@ public class EscrowService {
   }
 
   private void refundOrder(TradeOrder order, UUID actorId, String reason) {
+    tossRefundIfNeeded(order, reason, null);
     Instant now = Instant.now();
     order.setEscrowStatus(EscrowStatus.refunded);
     order.setSettlementAmount(0);
@@ -417,6 +498,7 @@ public class EscrowService {
   }
 
   private void partialSettle(TradeOrder order, UUID actorId, int sellerAmount, int refundAmount) {
+    tossRefundIfNeeded(order, "합의 부분 환불", refundAmount);
     Instant now = Instant.now();
     order.setEscrowStatus(EscrowStatus.released);
     order.setSettlementAmount(sellerAmount);
@@ -564,6 +646,50 @@ public class EscrowService {
 
   private String formatWon(int amount) {
     return String.format("%,d원", amount);
+  }
+
+  private void assertPaymentNotExpired(TradeOrder order) {
+    if (order.getPaymentDeadlineAt() != null && Instant.now().isAfter(order.getPaymentDeadlineAt())) {
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "결제 기한이 지났습니다. 약속을 다시 잡아 주세요.");
+    }
+  }
+
+  private void applyPaidHeld(TradeOrder order, UUID userId, String paymentRef) {
+    Instant now = Instant.now();
+    order.setEscrowStatus(EscrowStatus.paid_held);
+    order.setPaidAt(now);
+    order.setPaymentRef(paymentRef);
+    order.setUpdatedAt(now);
+    orderRepository.save(order);
+
+    messageService.sendSystem(
+        order.getConversationId(),
+        userId,
+        "✅ 결제 완료 · " + formatWon(order.getAmount()) + "이 에스크로에 보관되었습니다.\n"
+            + "판매자가 " + tradeMethodLabel(order.getTradeMethod()) + " 이행(발송/배치)을 완료하면 알림이 갑니다.");
+  }
+
+  private void tossRefundIfNeeded(TradeOrder order, String reason, Integer refundAmount) {
+    String ref = order.getPaymentRef();
+    if (ref == null || ref.startsWith("mock-") || !tossProperties.isConfigured()) {
+      return;
+    }
+    tossPaymentsClient.cancel(ref, reason, refundAmount);
+  }
+
+  private static String truncateOrderName(String title) {
+    if (title == null || title.isBlank()) {
+      return "Villager 거래";
+    }
+    String trimmed = title.trim();
+    return trimmed.length() <= 100 ? trimmed : trimmed.substring(0, 100);
+  }
+
+  private static String appendQuery(String baseUrl, String query) {
+    if (baseUrl == null || baseUrl.isBlank()) {
+      return "?" + query;
+    }
+    return baseUrl + (baseUrl.contains("?") ? "&" : "?") + query;
   }
 
   private void publishOrder(UUID conversationId, TradeOrder order) {

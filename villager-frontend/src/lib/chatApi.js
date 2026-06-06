@@ -1,8 +1,16 @@
 import { apiFetch } from './api';
+import { resolveListingImageUrl } from './listingImages';
+let conversationsInflight = null;
 
 export async function fetchConversations() {
-  const data = await apiFetch('/api/v1/conversations');
-  return (data ?? []).map(mapConversationSummary);
+  if (!conversationsInflight) {
+    conversationsInflight = apiFetch('/api/v1/conversations')
+      .then((data) => (data ?? []).map(mapConversationSummary))
+      .finally(() => {
+        conversationsInflight = null;
+      });
+  }
+  return conversationsInflight;
 }
 
 export async function fetchConversation(conversationId) {
@@ -83,7 +91,7 @@ function mapConversationSummary(c) {
     id: c.id,
     listingId: c.listingId,
     listingTitle: c.listingTitle,
-    listingImageUrl: c.listingImageUrl ?? '',
+    listingImageUrl: resolveListingImageUrl(c.listingImageUrl ?? ''),
     listingPrice: c.listingPrice ?? 0,
     listingFree: c.listingFree,
     neighborhood: c.neighborhood ?? '',
