@@ -1,0 +1,128 @@
+.payout-screen {
+  z-index: 300;
+}
+
+.payout-screen__alert {
+  margin: 0 0 0.85rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.payout-screen__alert--error {
+  background: #fdecea;
+  color: #9b2226;
+  border: 1px solid rgba(155, 34, 38, 0.15);
+}
+
+.payout-screen__alert--ok {
+  background: #e8f5e9;
+  color: #1b4332;
+  border: 1px solid rgba(45, 106, 79, 0.15);
+}
+
+.payout-screen__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.payout-screen__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #52796f;
+}
+
+.payout-screen__field input,
+.payout-screen__field select {
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(45, 106, 79, 0.2);
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.payout-screen__btn {
+  margin-top: 0.25rem;
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background: #2d6a4f;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.payout-screen__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.payout-screen__btn--secondary {
+  background: rgba(45, 106, 79, 0.12);
+  color: #2d6a4f;
+}
+
+.payout-screen__verified-badge {
+  margin: 0 0 0.75rem;
+  font-weight: 700;
+  color: #2d6a4f;
+}
+
+.payout-screen__details {
+  margin: 0 0 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.payout-screen__details dt {
+  font-size: 0.72rem;
+  color: #84a98c;
+  font-weight: 600;
+}
+
+.payout-screen__details dd {
+  margin: 0.1rem 0 0;
+  font-size: 0.95rem;
+  color: #1b4332;
+  font-weight: 600;
+}
+
+.payout-screen__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.payout-screen__bank-push {
+  margin: 0.75rem 0;
+  padding: 0.85rem;
+  border-radius: 10px;
+  background: #f5f9ff;
+  border: 1px solid rgba(33, 150, 243, 0.2);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.payout-screen__bank-push-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #1565c0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.payout-screen__mock-code {
+  margin: 0.5rem 0 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  background: #fff8e1;
+  color: #7f4f00;
+  font-size: 0.85rem;
+}

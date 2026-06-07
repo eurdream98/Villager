@@ -10,8 +10,16 @@ Remove-Item Env:SERVER_ADDRESS -ErrorAction SilentlyContinue
 Remove-Item Env:HTTP_PROXY, Env:HTTPS_PROXY, Env:ALL_PROXY, Env:http_proxy, Env:https_proxy -ErrorAction SilentlyContinue
 
 Set-Location $PSScriptRoot
+
+$portLine = netstat -ano | Select-String ":8080\s+.*LISTENING"
+if ($portLine) {
+  $pidOnPort = ($portLine -split "\s+")[-1]
+  Write-Host "포트 8080 사용 중 (PID $pidOnPort). 기존 백엔드를 쓰거나 종료 후 다시 실행하세요:" -ForegroundColor Yellow
+  Write-Host "  Stop-Process -Id $pidOnPort -Force"
+  exit 1
+}
+
 Write-Host "Starting villager-backend on http://127.0.0.1:8080 ..."
-# Supabase DB 호스트는 IPv6(AAAA)만 있는 경우가 있어 IPv6 우선
-# preferIPv6: Supabase JDBC(AAAA)용. server.address=0.0.0.0 과 함께 Tomcat 은 IPv4 로 listen.
-$jvmArgs = "-Djava.net.preferIPv6Addresses=true -Dserver.port=8080 -Dserver.address=0.0.0.0 -Djava.net.useSystemProxies=false -DsocksProxyHost= -DsocksProxyPort= -Dhttp.proxyHost= -Dhttps.proxyHost= -Dhttp.nonProxyHosts=*"
+# preferIPv6Addresses=true 는 Windows 에서 Tomcat "Bad address: listen" 을 유발할 수 있음
+$jvmArgs = "-Dserver.port=8080 -Dserver.address=0.0.0.0 -Djava.net.useSystemProxies=false -DsocksProxyHost= -DsocksProxyPort= -Dhttp.proxyHost= -Dhttps.proxyHost= -Dhttp.nonProxyHosts=*"
 .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local" "-Dspring-boot.run.jvmArguments=$jvmArgs"

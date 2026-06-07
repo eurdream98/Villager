@@ -18,7 +18,7 @@ const APPOINTMENT_BADGE = {
   pending: '약속 제안',
 };
 
-function ChatPage({ user, onUnreadChange }) {
+function ChatPage({ user, onUnreadChange, onOpenPayoutAccount }) {
   const { conversations, loading, error, reload } = useConversations();
   const [activeChat, setActiveChat] = useState(null);
 
@@ -52,6 +52,7 @@ function ChatPage({ user, onUnreadChange }) {
           reload({ silent: true });
           onUnreadChange?.();
         }}
+        onOpenPayoutAccount={onOpenPayoutAccount}
       />
     );
   }

@@ -28,6 +28,9 @@ create type escrow_status as enum (
   'cancelled'
 );
 
+-- 판매자 정산 계좌 인증 상태
+create type payout_account_status as enum ('pending', 'verified');
+
 -- ---------------------------------------------------------------------------
 -- 1. 회원 프로필 (auth.users 와 1:1)
 -- ---------------------------------------------------------------------------
@@ -42,6 +45,24 @@ create table public.profiles (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- 판매자 정산 계좌 (에스크로 거래 시 판매자 본인 계좌 등록·인증)
+create table public.seller_payout_accounts (
+  user_id uuid primary key references public.profiles (id) on delete cascade,
+  bank_code text not null,
+  bank_name text not null,
+  account_number text not null,
+  account_holder text not null,
+  status payout_account_status not null default 'pending',
+  verification_code text,
+  verification_sent_at timestamptz,
+  verified_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index seller_payout_accounts_status_idx
+  on public.seller_payout_accounts (status);
 
 -- ---------------------------------------------------------------------------
 -- 2. 동네 (나무 지도·피드 필터용, 선택)

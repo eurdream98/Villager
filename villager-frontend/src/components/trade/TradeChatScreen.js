@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { markConversationRead } from '../../lib/chatApi';
+import { usePayoutAccount } from '../../hooks/usePayoutAccount';
 import { useTradeChat } from '../../hooks/useTradeChat';
 import { resolveListingImageUrl } from '../../lib/listingImages';
 import { formatPrice } from '../../lib/trade';
@@ -38,6 +39,7 @@ function TradeChatScreen({
   onBack,
   embedded = false,
   onMarkedRead,
+  onOpenPayoutAccount,
 }) {
   const [draft, setDraft] = useState('');
   const messagesContainerRef = useRef(null);
@@ -53,6 +55,12 @@ function TradeChatScreen({
     resetAppointment,
     refresh,
   } = useTradeChat(conversationId);
+
+  const isSeller = user?.id === sellerId;
+  const listingFree = tradeInfo?.listingFree ?? false;
+  const { isVerified: sellerPayoutVerified } = usePayoutAccount(
+    isSeller && !listingFree,
+  );
 
   useEffect(() => {
     if (!messages.length) return;
@@ -148,7 +156,9 @@ function TradeChatScreen({
         order={order}
         currentUserId={user.id}
         sellerId={sellerId}
-        listingFree={tradeInfo?.listingFree ?? false}
+        listingFree={listingFree}
+        sellerPayoutVerified={sellerPayoutVerified}
+        onOpenPayoutAccount={onOpenPayoutAccount}
         onPropose={proposeAppointment}
         onConfirm={confirmAppointment}
         onReset={resetAppointment}

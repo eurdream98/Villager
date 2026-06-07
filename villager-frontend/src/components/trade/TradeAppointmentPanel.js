@@ -15,6 +15,8 @@ function TradeAppointmentPanel({
   currentUserId,
   sellerId,
   listingFree,
+  sellerPayoutVerified,
+  onOpenPayoutAccount,
   onPropose,
   onConfirm,
   onReset,
@@ -27,6 +29,8 @@ function TradeAppointmentPanel({
 
   const isSeller = currentUserId === sellerId;
   const roleLabel = isSeller ? '판매자' : '구매자';
+  const isEscrowDraft =
+    !listingFree && (tradeMethod === 'shipping' || tradeMethod === 'door');
 
   const handlePropose = (e) => {
     e.preventDefault();
@@ -123,6 +127,27 @@ function TradeAppointmentPanel({
             <dd>{summary.location}</dd>
           </div>
         </dl>
+        {isSeller
+          && isProposer
+          && !listingFree
+          && (appointment.tradeMethod === 'shipping' || appointment.tradeMethod === 'door')
+          && sellerPayoutVerified === false && (
+          <p className="trade-apt__hint trade-apt__hint--warn">
+            정산 계좌 인증이 완료되지 않으면 구매자가 약속을 수락할 수 없습니다.
+            {onOpenPayoutAccount && (
+              <>
+                {' '}
+                <button
+                  type="button"
+                  className="trade-apt__link"
+                  onClick={onOpenPayoutAccount}
+                >
+                  정산 계좌 등록
+                </button>
+              </>
+            )}
+          </p>
+        )}
         <p className="trade-apt__hint">
           {isProposer ? (
             <>
@@ -225,6 +250,26 @@ function TradeAppointmentPanel({
             maxLength={200}
             required
           />
+
+          {isSeller && isEscrowDraft && sellerPayoutVerified === false && (
+            <p className="trade-apt__hint trade-apt__hint--warn">
+              택배·문고리 에스크로는 <strong>정산 계좌 인증</strong>이 필요합니다.
+              {onOpenPayoutAccount ? (
+                <>
+                  {' '}
+                  <button
+                    type="button"
+                    className="trade-apt__link"
+                    onClick={onOpenPayoutAccount}
+                  >
+                    정산 계좌 등록
+                  </button>
+                </>
+              ) : (
+                ' 상단 메뉴 「정산 계좌」에서 등록해 주세요.'
+              )}
+            </p>
+          )}
 
           {error && (
             <p className="trade-apt__error" role="alert">

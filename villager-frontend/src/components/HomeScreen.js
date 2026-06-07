@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { signOut } from '../lib/auth';
 import GrowthContributionScreen from './growth/GrowthContributionScreen';
+import PayoutAccountScreen from './settings/PayoutAccountScreen';
+import { usePayoutAccount } from '../hooks/usePayoutAccount';
 import NeighborhoodTreeMapScreen from './growth/NeighborhoodTreeMapScreen';
 import { useChatUnread } from '../hooks/useChatUnread';
 import { useGrowthStats } from '../hooks/useGrowthStats';
@@ -20,6 +22,12 @@ function HomeScreen({ user }) {
 
   const { member, loading: profileLoading } = useMemberProfile(user);
   const {
+    account: payoutAccount,
+    loading: payoutLoading,
+    error: payoutError,
+    refresh: refreshPayout,
+  } = usePayoutAccount(!!user);
+  const {
     personal,
     neighborhoodTrees,
     loading: growthLoading,
@@ -27,16 +35,29 @@ function HomeScreen({ user }) {
   } = useGrowthStats(user?.id);
   const { unreadTotal, refreshChatUnread } = useChatUnread(!!user, user?.id);
 
+  const openGrowth = () => setOverlay('growth');
+  const openPayout = () => setOverlay('payout');
+  const openTreeMap = () => setOverlay('treeMap');
+  const closeGrowth = () => setOverlay(null);
+  const closePayout = () => setOverlay(null);
+  const closeTreeMap = () => setOverlay('growth');
+
   const renderTabPage = () => {
     if (activeTab === 'trade') {
-      return <TradePage user={user} member={member} />;
+      return <TradePage user={user} member={member} onOpenPayoutAccount={openPayout} />;
     }
     if (activeTab === 'chat') {
-      return <ChatPage user={user} onUnreadChange={refreshChatUnread} />;
+      return (
+        <ChatPage
+          user={user}
+          onUnreadChange={refreshChatUnread}
+          onOpenPayoutAccount={openPayout}
+        />
+      );
     }
     if (activeTab === 'community') return <CommunityPage />;
     if (activeTab === 'jobs') return <JobsPage />;
-    return <TradePage user={user} member={member} />;
+    return <TradePage user={user} member={member} onOpenPayoutAccount={openPayout} />;
   };
 
   const handleLogout = async () => {
@@ -49,11 +70,6 @@ function HomeScreen({ user }) {
     }
   };
 
-  const openGrowth = () => setOverlay('growth');
-  const openTreeMap = () => setOverlay('treeMap');
-  const closeGrowth = () => setOverlay(null);
-  const closeTreeMap = () => setOverlay('growth');
-
   return (
     <div className="home">
       <header className="home__header">
@@ -62,6 +78,7 @@ function HomeScreen({ user }) {
           member={member}
           loading={profileLoading}
           onViewGrowth={openGrowth}
+          onViewPayout={openPayout}
           onLogout={handleLogout}
           logoutLoading={logoutLoading}
         />
@@ -76,6 +93,16 @@ function HomeScreen({ user }) {
           activeTab={activeTab}
           onTabChange={setActiveTab}
           chatUnreadTotal={unreadTotal}
+        />
+      )}
+
+      {overlay === 'payout' && (
+        <PayoutAccountScreen
+          account={payoutAccount}
+          loading={payoutLoading}
+          error={payoutError}
+          onRefresh={refreshPayout}
+          onClose={closePayout}
         />
       )}
 

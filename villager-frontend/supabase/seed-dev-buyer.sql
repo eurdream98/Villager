@@ -148,6 +148,27 @@ begin
     total_xp = excluded.total_xp,
     updated_at = now();
 
+  insert into public.seller_payout_accounts (
+    user_id, bank_code, bank_name, account_number, account_holder, status, verified_at
+  )
+  values (
+    v_seller_id,
+    '090',
+    '카카오뱅크',
+    '3333012345678',
+    '데모 판매자',
+    'verified',
+    now()
+  )
+  on conflict (user_id) do update set
+    bank_code = excluded.bank_code,
+    bank_name = excluded.bank_name,
+    account_number = excluded.account_number,
+    account_holder = excluded.account_holder,
+    status = excluded.status,
+    verified_at = excluded.verified_at,
+    updated_at = now();
+
   insert into public.trade_listings (
     id, seller_id, neighborhood, title, description, price, is_free, status
   )

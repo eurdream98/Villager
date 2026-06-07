@@ -432,10 +432,18 @@ function TradeEscrowPanel({
       )}
 
       {order.paymentRef?.startsWith('mock-') && (
-        <p className="trade-escrow__mock">개발 모드: mock 결제 (PG 미연동)</p>
+        <p className="trade-escrow__mock">개발 모드: 즉시 mock 결제</p>
       )}
       {order.paymentRef && !order.paymentRef.startsWith('mock-') && (
-        <p className="trade-escrow__mock">토스페이먼츠 결제 · {order.paymentRef.slice(0, 12)}…</p>
+        <p className="trade-escrow__mock">
+          토스 테스트 결제 · {order.paymentRef.slice(0, 12)}… (실제 출금 없음)
+        </p>
+      )}
+      {status === ESCROW_STATUS.PENDING_PAYMENT && (
+        <p className="trade-escrow__hint">
+          결제하기를 누르면 토스 테스트 결제창이 열리고, 완료 후 successUrl을 거쳐
+          에스크로에 보관됩니다.
+        </p>
       )}
     </div>
   );

@@ -15,7 +15,7 @@ import TradeListingCard from '../trade/TradeListingCard';
 import TradeSellScreen from '../trade/TradeSellScreen';
 import '../trade/Trade.css';
 
-function TradePage({ user, member }) {
+function TradePage({ user, member, onOpenPayoutAccount }) {
   const [view, setView] = useState('list');
   const [selectedListing, setSelectedListing] = useState(null);
   const [conversationId, setConversationId] = useState(null);
@@ -185,6 +185,7 @@ function TradePage({ user, member }) {
         user={user}
         sellerId={selectedListing.sellerId}
         onBack={() => setView('detail')}
+        onOpenPayoutAccount={onOpenPayoutAccount}
       />
     );
   }

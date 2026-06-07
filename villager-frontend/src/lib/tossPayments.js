@@ -95,9 +95,12 @@ export async function startEscrowPayment(conversationId) {
     },
   };
 
-  // 데스크톱: 리다이렉트 없이 iframe → paymentKey 받아서 바로 서버 승인
-  const forceRedirect = process.env.REACT_APP_TOSS_FORCE_REDIRECT === 'true';
-  if (!forceRedirect && !isMobileDevice()) {
+  // successUrl → payment-success.html → App.js confirm (실제 PG와 동일 흐름)
+  // REACT_APP_TOSS_USE_IFRAME=true 일 때만 데스크톱 iframe 즉시 승인
+  const useIframe =
+    process.env.REACT_APP_TOSS_USE_IFRAME === 'true' && !isMobileDevice();
+
+  if (useIframe) {
     const result = await payment.requestPayment({
       ...paymentRequest,
       windowTarget: 'iframe',
@@ -111,7 +114,6 @@ export async function startEscrowPayment(conversationId) {
     return 'confirmed';
   }
 
-  // 모바일·QR: payment-success.html 로 리다이렉트 (쿼리 보존 후 / 로 이동)
   await payment.requestPayment({
     ...paymentRequest,
     successUrl: prep.successUrl,

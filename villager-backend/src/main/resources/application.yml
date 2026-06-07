@@ -1,4 +1,6 @@
 server:
+  # Windows: 빈 SERVER_ADDRESS / 127.0.0.1 조합 시 "Bad address: listen" — 0.0.0.0 고정
+  address: 0.0.0.0
   port: ${PORT:8080}
 
 spring:
@@ -45,7 +47,9 @@ villager:
     inspection-deadline-hours-shipping: 168
     inspection-deadline-hours-door: 48
     auto-receipt-confirm-hours: 168
-    mock-payment-enabled: false
+    mock-payment-enabled: true
+    mock-payout-verification-enabled: true
+    require-payout-account-for-escrow: true
     scheduler-interval-ms: 60000
   toss:
     enabled: ${TOSS_ENABLED:true}

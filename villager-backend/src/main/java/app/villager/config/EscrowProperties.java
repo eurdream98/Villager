@@ -1,8 +1,12 @@
 package app.villager.config;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+@Getter
+@Setter
 @Component
 @ConfigurationProperties(prefix = "villager.escrow")
 public class EscrowProperties {
@@ -19,48 +23,14 @@ public class EscrowProperties {
   /** 판매자 이행 후 구매자 수령 확인 없을 때 자동 수령 확정까지 (시간) — 기본 7일 */
   private int autoReceiptConfirmHours = 168;
 
-  /** true: PG 없이 mock 결제 허용 (로컬 개발) */
+  /** true: PG 없이 mock 결제 허용 (POST .../order/pay 개발용) */
   private boolean mockPaymentEnabled = true;
 
-  public int getPaymentDeadlineHours() {
-    return paymentDeadlineHours;
-  }
+  /** true: 1원 인증 시뮬레이션 (입금자명·인증번호 노출) */
+  private boolean mockPayoutVerificationEnabled = true;
 
-  public void setPaymentDeadlineHours(int paymentDeadlineHours) {
-    this.paymentDeadlineHours = paymentDeadlineHours;
-  }
-
-  public int getInspectionDeadlineHoursShipping() {
-    return inspectionDeadlineHoursShipping;
-  }
-
-  public void setInspectionDeadlineHoursShipping(int inspectionDeadlineHoursShipping) {
-    this.inspectionDeadlineHoursShipping = inspectionDeadlineHoursShipping;
-  }
-
-  public int getInspectionDeadlineHoursDoor() {
-    return inspectionDeadlineHoursDoor;
-  }
-
-  public void setInspectionDeadlineHoursDoor(int inspectionDeadlineHoursDoor) {
-    this.inspectionDeadlineHoursDoor = inspectionDeadlineHoursDoor;
-  }
-
-  public int getAutoReceiptConfirmHours() {
-    return autoReceiptConfirmHours;
-  }
-
-  public void setAutoReceiptConfirmHours(int autoReceiptConfirmHours) {
-    this.autoReceiptConfirmHours = autoReceiptConfirmHours;
-  }
-
-  public boolean isMockPaymentEnabled() {
-    return mockPaymentEnabled;
-  }
-
-  public void setMockPaymentEnabled(boolean mockPaymentEnabled) {
-    this.mockPaymentEnabled = mockPaymentEnabled;
-  }
+  /** true: 택배·문고리 에스크로 전 판매자 계좌 인증 필수 */
+  private boolean requirePayoutAccountForEscrow = true;
 
   public int inspectionHoursFor(TradeMethodName method) {
     return method == TradeMethodName.door

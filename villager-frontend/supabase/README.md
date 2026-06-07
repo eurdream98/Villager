@@ -5,7 +5,7 @@
 ## 적용 순서
 
 1. `schema.sql` 실행
-2. (기존 DB) `escrow-migration.sql` · `auto-receipt-migration.sql` · `listing-images-storage.sql` 각 1회 실행
+2. (기존 DB) `escrow-migration.sql` · `auto-receipt-migration.sql` · `payout-account-migration.sql` · `listing-images-storage.sql` 각 1회 실행
 3. 앱에서 OAuth 로그인 1회 ( `profiles` 자동 생성 )
 3. `seed.sql` 실행 (동네·거래 더미, 계정 2개면 채팅·약속 샘플 포함)  
    또는 **`seed-dev-buyer.sql`** (고정 구매자·판매자 + 에스크로 대기 주문 — 로그인 화면 「데모 구매자」용)
@@ -39,6 +39,7 @@
 | `trade_messages` | 채팅 메시지 |
 | `trade_appointments` | 약속 (방법·시간·장소) |
 | `trade_orders` | 에스크로 (PG 연동 후) |
+| `seller_payout_accounts` | 판매자 정산 계좌 (에스크로 전 인증) |
 | `member_growth` / `xp_events` | 성장 기여도 |
 
 피드 조회는 `trade_listings_feed` 뷰를 사용할 수 있습니다.

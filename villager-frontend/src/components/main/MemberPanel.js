@@ -1,7 +1,7 @@
 import MemberBadge from './MemberBadge';
 import './MemberPanel.css';
 
-function MemberPanel({ member, loading, onViewGrowth, onLogout, logoutLoading }) {
+function MemberPanel({ member, loading, onViewGrowth, onViewPayout, onLogout, logoutLoading }) {
   return (
     <div className="member-panel">
       <MemberBadge member={member} loading={loading} />
@@ -13,6 +13,13 @@ function MemberPanel({ member, loading, onViewGrowth, onLogout, logoutLoading })
             onClick={onViewGrowth}
           >
             성장 기여도 보기
+          </button>
+          <button
+            type="button"
+            className="member-panel__btn member-panel__btn--growth"
+            onClick={onViewPayout}
+          >
+            정산 계좌
           </button>
           <button
             type="button"

@@ -2,7 +2,7 @@
 # Run: .\run-local.ps1  (또는 npm 과 다른 터미널에서 mvnw 실행)
 
 server:
-  # Windows + -Djava.net.preferIPv6Addresses (run-local.ps1): IPv4 로 listen
+  # Windows: 0.0.0.0 (preferIPv6 JVM 옵션은 Tomcat "Bad address: listen" 유발 가능)
   address: 0.0.0.0
   port: 8080
 

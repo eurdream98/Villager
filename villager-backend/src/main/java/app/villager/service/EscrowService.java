@@ -48,6 +48,7 @@ public class EscrowService {
   private final EscrowProperties escrowProperties;
   private final TossPaymentsProperties tossProperties;
   private final TossPaymentsClient tossPaymentsClient;
+  private final PayoutAccountService payoutAccountService;
   private final XpService xpService;
 
   public EscrowService(
@@ -61,6 +62,7 @@ public class EscrowService {
       EscrowProperties escrowProperties,
       TossPaymentsProperties tossProperties,
       TossPaymentsClient tossPaymentsClient,
+      PayoutAccountService payoutAccountService,
       XpService xpService) {
     this.orderRepository = orderRepository;
     this.conversationRepository = conversationRepository;
@@ -72,6 +74,7 @@ public class EscrowService {
     this.escrowProperties = escrowProperties;
     this.tossProperties = tossProperties;
     this.tossPaymentsClient = tossPaymentsClient;
+    this.payoutAccountService = payoutAccountService;
     this.xpService = xpService;
   }
 
@@ -108,6 +111,14 @@ public class EscrowService {
           "🤝 만나서 거래는 현장에서 물건 확인 후 직접 결제하는 방식입니다.\n"
               + "에스크로 결제는 택배·문고리 거래에만 제공됩니다.");
       return;
+    }
+
+    if (escrowProperties.isRequirePayoutAccountForEscrow()
+        && !payoutAccountService.hasVerifiedAccount(conversation.getSellerId())) {
+      throw new BusinessException(
+          HttpStatus.PRECONDITION_FAILED,
+          "에스크로 거래를 위해 판매자의 정산 계좌 등록·인증이 필요합니다. "
+              + "판매자는 상단 메뉴 「정산 계좌」에서 등록해 주세요.");
     }
 
     Instant now = Instant.now();
@@ -173,6 +184,7 @@ public class EscrowService {
     requireBuyer(order, userId);
     requireStatus(order, EscrowStatus.pending_payment);
     assertPaymentNotExpired(order);
+    assertSellerPayoutReady(order.getSellerId());
 
     TradeListing listing = listingRepository
         .findById(order.getListingId())
@@ -461,6 +473,7 @@ public class EscrowService {
             + "기한 내 조치가 없으면 자동으로 판매자에게 정산됩니다.");
   }
 
+  /** TODO: PG 지급대행 연동 시 payoutAccountService + TossPayoutClient 로 실제 송금 */
   private void releaseToSeller(TradeOrder order, UUID actorId, int sellerAmount, String reason) {
     Instant now = Instant.now();
     order.setEscrowStatus(EscrowStatus.released);
@@ -471,10 +484,19 @@ public class EscrowService {
     orderRepository.save(order);
     markListingSold(order.getListingId(), now);
 
+    String payoutLine =
+        payoutAccountService
+            .describeVerifiedAccount(order.getSellerId())
+            .map(acc -> "\n💰 정산(mock 송금): " + formatWon(sellerAmount) + " → " + acc)
+            .orElse("");
+
     messageService.sendSystem(
         order.getConversationId(),
         actorId,
-        "🎉 거래 완료 · " + formatWon(sellerAmount) + "이 판매자에게 정산되었습니다.\n" + reason);
+        "🎉 거래 완료 · " + formatWon(sellerAmount) + "이 판매자에게 정산되었습니다."
+            + payoutLine
+            + "\n"
+            + reason);
 
     xpService.addXp(order.getBuyerId(), 10);
     xpService.addXp(order.getSellerId(), 10);
@@ -651,6 +673,15 @@ public class EscrowService {
   private void assertPaymentNotExpired(TradeOrder order) {
     if (order.getPaymentDeadlineAt() != null && Instant.now().isAfter(order.getPaymentDeadlineAt())) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "결제 기한이 지났습니다. 약속을 다시 잡아 주세요.");
+    }
+  }
+
+  private void assertSellerPayoutReady(UUID sellerId) {
+    if (escrowProperties.isRequirePayoutAccountForEscrow()
+        && !payoutAccountService.hasVerifiedAccount(sellerId)) {
+      throw new BusinessException(
+          HttpStatus.PRECONDITION_FAILED,
+          "판매자의 정산 계좌 인증이 완료되지 않아 결제를 진행할 수 없습니다.");
     }
   }
 

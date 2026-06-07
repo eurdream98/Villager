@@ -1685,6 +1685,14 @@
   color: #c1121f;
 }
 
+.trade-apt__hint--warn {
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(230, 57, 70, 0.08);
+  color: #9b2226;
+  border: 1px solid rgba(230, 57, 70, 0.15);
+}
+
 .trade-apt__hint--meet,
 .trade-apt__hint--pay {
   padding: 0.65rem 0.75rem;
