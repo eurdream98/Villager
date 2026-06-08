@@ -1,0 +1,387 @@
+.group-buy-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.group-buy-card {
+  display: flex;
+  gap: 0.85rem;
+  padding: 0.9rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(45, 106, 79, 0.12);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.group-buy-card__thumb {
+  width: 88px;
+  height: 88px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #e8f0ec;
+}
+
+.group-buy-card__thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+.group-buy-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.group-buy-card__title {
+  margin: 0 0 0.25rem;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #1b4332;
+}
+
+.group-buy-card__price {
+  margin: 0 0 0.45rem;
+  font-size: 0.9rem;
+  color: #2d6a4f;
+  font-weight: 600;
+}
+
+.group-buy-card__meta {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #52796f;
+}
+
+.group-buy-progress {
+  margin: 0.5rem 0 0.35rem;
+  height: 6px;
+  border-radius: 999px;
+  background: #d8f3dc;
+  overflow: hidden;
+}
+
+.group-buy-progress__bar {
+  height: 100%;
+  background: linear-gradient(90deg, #40916c, #2d6a4f);
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.group-buy-badge {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #d8f3dc;
+  color: #1b4332;
+}
+
+.group-buy-badge--pickup {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.group-buy-badge--done {
+  background: #e2e3e5;
+  color: #495057;
+}
+
+.group-buy-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.group-buy-create-btn {
+  padding: 0.45rem 0.85rem;
+  border: none;
+  border-radius: 999px;
+  background: #2d6a4f;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.group-buy-screen {
+  padding: 0.75rem 1rem 1.5rem;
+}
+
+.group-buy-screen__back {
+  border: none;
+  background: none;
+  color: #2d6a4f;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 0.75rem;
+}
+
+.group-buy-gallery {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.group-buy-gallery__img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.group-buy-gallery__thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.group-buy-detail__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1b4332;
+}
+
+.group-buy-detail__price {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d6a4f;
+}
+
+.group-buy-detail__desc {
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #52796f;
+  white-space: pre-wrap;
+}
+
+.group-buy-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  color: #1d6a9f;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.group-buy-panel {
+  padding: 1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(45, 106, 79, 0.12);
+  margin-bottom: 1rem;
+}
+
+.group-buy-panel__title {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1b4332;
+}
+
+.group-buy-panel__text {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #52796f;
+}
+
+.group-buy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.group-buy-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #2d6a4f;
+  background: #fff;
+  color: #2d6a4f;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.group-buy-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.group-buy-btn--primary {
+  background: #2d6a4f;
+  color: #fff;
+}
+
+.group-buy-btn--secondary {
+  border-color: #95b8a8;
+  color: #52796f;
+}
+
+.group-buy-btn--dev {
+  border-color: #b08968;
+  color: #6d4c41;
+  background: #fff8f0;
+  flex: none;
+}
+
+.group-buy-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.group-buy-field label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1b4332;
+}
+
+.group-buy-field input,
+.group-buy-field textarea {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid rgba(45, 106, 79, 0.2);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.group-buy-field textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.group-buy-field__hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  color: #74a892;
+  line-height: 1.4;
+}
+
+.group-buy-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.group-buy-photo {
+  position: relative;
+  width: 72px;
+  height: 72px;
+}
+
+.group-buy-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.group-buy-photo button {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: #1b4332;
+  color: #fff;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.group-buy-alert {
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.group-buy-alert--error {
+  background: #fde8e8;
+  color: #9b2226;
+}
+
+.group-buy-alert--info {
+  background: #e8f4fd;
+  color: #1d4e89;
+}
+
+.group-buy-dev {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+  border: 1px dashed #b08968;
+  background: #fffaf5;
+}
+
+.group-buy-dev__title {
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #6d4c41;
+}
+
+.group-buy-steps {
+  display: flex;
+  gap: 0.35rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+}
+
+.group-buy-steps li {
+  flex: 1;
+  text-align: center;
+  font-size: 0.72rem;
+  padding: 0.35rem 0.2rem;
+  border-radius: 6px;
+  background: #edf2ef;
+  color: #74a892;
+}
+
+.group-buy-steps li.is-done {
+  background: #d8f3dc;
+  color: #1b4332;
+  font-weight: 700;
+}
+
+.group-buy-steps li.is-current {
+  outline: 2px solid #2d6a4f;
+}
+
+.group-buy-empty {
+  margin-top: 1.25rem;
+  padding: 1.25rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(45, 106, 79, 0.1);
+  color: #52796f;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: center;
+}

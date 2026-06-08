@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "maven: compile villager-backend",
+      "type": "shell",
+      "command": "${workspaceFolder}/villager-backend/mvnw.cmd",
+      "args": ["compile", "-DskipTests", "-q"],
+      "options": {
+        "cwd": "${workspaceFolder}/villager-backend"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

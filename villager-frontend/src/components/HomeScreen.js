@@ -55,7 +55,9 @@ function HomeScreen({ user }) {
         />
       );
     }
-    if (activeTab === 'community') return <CommunityPage />;
+    if (activeTab === 'community') {
+      return <CommunityPage user={user} member={member} />;
+    }
     if (activeTab === 'jobs') return <JobsPage />;
     return <TradePage user={user} member={member} onOpenPayoutAccount={openPayout} />;
   };

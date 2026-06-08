@@ -42,6 +42,10 @@ villager:
     max-file-bytes: 5242880
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000}
+  group-buy:
+    mock-payment-enabled: true
+    dev-simulate-enabled: true
+    scheduler-interval-ms: 60000
   escrow:
     payment-deadline-hours: 24
     inspection-deadline-hours-shipping: 168

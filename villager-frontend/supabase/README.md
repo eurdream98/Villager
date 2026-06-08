@@ -5,7 +5,7 @@
 ## 적용 순서
 
 1. `schema.sql` 실행
-2. (기존 DB) `escrow-migration.sql` · `auto-receipt-migration.sql` · `payout-account-migration.sql` · `listing-images-storage.sql` 각 1회 실행
+2. (기존 DB) `escrow-migration.sql` · `auto-receipt-migration.sql` · `payout-account-migration.sql` · `listing-images-storage.sql` · `group-buy-migration.sql` 각 1회 실행
 3. 앱에서 OAuth 로그인 1회 ( `profiles` 자동 생성 )
 3. `seed.sql` 실행 (동네·거래 더미, 계정 2개면 채팅·약속 샘플 포함)  
    또는 **`seed-dev-buyer.sql`** (고정 구매자·판매자 + 에스크로 대기 주문 — 로그인 화면 「데모 구매자」용)

@@ -1,13 +1,98 @@
+import { useCallback, useEffect, useState } from 'react';
+import GroupBuyCreateScreen from '../community/GroupBuyCreateScreen';
+import GroupBuyDetailScreen from '../community/GroupBuyDetailScreen';
+import GroupBuyFeed from '../community/GroupBuyFeed';
+import { fetchGroupBuys } from '../../lib/groupBuyApi';
+import '../community/GroupBuy.css';
 import './TabPages.css';
 
-function CommunityPage() {
+function CommunityPage({ user, member }) {
+  const [view, setView] = useState('feed');
+  const [selectedId, setSelectedId] = useState(null);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const loadFeed = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchGroupBuys();
+      setItems(data);
+    } catch (err) {
+      setError(err.message || '목록을 불러오지 못했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (view === 'feed') {
+      loadFeed();
+    }
+  }, [view, loadFeed]);
+
+  if (view === 'create') {
+    return (
+      <GroupBuyCreateScreen
+        user={user}
+        member={member}
+        onBack={() => setView('feed')}
+        onCreated={(id) => {
+          setSelectedId(id);
+          setView('detail');
+        }}
+      />
+    );
+  }
+
+  if (view === 'detail' && selectedId) {
+    return (
+      <GroupBuyDetailScreen
+        id={selectedId}
+        user={user}
+        onBack={() => {
+          setView('feed');
+          setSelectedId(null);
+        }}
+      />
+    );
+  }
+
   return (
     <section className="tab-page" aria-labelledby="tab-community-title">
-      <h2 id="tab-community-title" className="tab-page__title">
-        커뮤니티
-      </h2>
-      <p className="tab-page__desc">동네 소식과 이야기를 나눠 보세요.</p>
-      <div className="tab-page__card">게시글 피드는 곧 이곳에 표시됩니다.</div>
+      <div className="group-buy-header">
+        <div>
+          <h2 id="tab-community-title" className="tab-page__title">
+            커뮤니티
+          </h2>
+          <p className="tab-page__desc">동네 공동구매를 모집하고 참여해 보세요.</p>
+        </div>
+        {user && (
+          <button
+            type="button"
+            className="group-buy-create-btn"
+            onClick={() => setView('create')}
+          >
+            + 공동구매
+          </button>
+        )}
+      </div>
+
+      {error && (
+        <div className="group-buy-alert group-buy-alert--error" role="alert">
+          {error}
+        </div>
+      )}
+
+      <GroupBuyFeed
+        items={items}
+        loading={loading}
+        onSelect={(id) => {
+          setSelectedId(id);
+          setView('detail');
+        }}
+      />
     </section>
   );
 }
