@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { uploadListingImages } from '../../lib/listingImages';
 import './Trade.css';
+import LocationPicker from './LocationPicker';
 
 const EMPTY_FORM = {
   title: '',
   isFree: false,
   price: '',
   neighborhood: '',
+  latitude: null,
+  longitude: null,
+  address: '',
 };
 
 function TradeSellScreen({ user, onClose, onSubmit }) {
@@ -14,6 +18,7 @@ function TradeSellScreen({ user, onClose, onSubmit }) {
   const [previews, setPreviews] = useState([]);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [locationMode,setLocationMode] = useState('map');
 
   const handlePhotos = (e) => {
     const files = Array.from(e.target.files ?? []);
@@ -68,6 +73,9 @@ function TradeSellScreen({ user, onClose, onSubmit }) {
         isFree: form.isFree,
         price: form.isFree ? 0 : form.price,
         neighborhood: form.neighborhood,
+        latitude: form.latitude,
+        longitude: form.longitude,
+        address: form.address,
         imageUrls,
       });
       previews.forEach((p) => URL.revokeObjectURL(p.url));
@@ -178,19 +186,68 @@ function TradeSellScreen({ user, onClose, onSubmit }) {
         </section>
 
         <section className="trade-sell__section">
-          <label className="trade-sell__label" htmlFor="trade-neighborhood">
-            동네 (선택)
-          </label>
-          <input
-            id="trade-neighborhood"
-            className="trade-sell__input"
-            type="text"
-            placeholder="예: 역삼동"
-            value={form.neighborhood}
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, neighborhood: e.target.value }))
-            }
-          />
+          <span className="trade-sell__label">거래 위치 (선택)</span>
+
+          <div className="trade-sell__location-tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={locationMode === 'map'}
+              className={`trade-sell__location-tab${locationMode === 'map' ? ' trade-sell__location-tab--active' : ''}`}
+              onClick={() => setLocationMode('map')}
+            >
+              지도로 찍기
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={locationMode === 'text'}
+              className={`trade-sell__location-tab${locationMode === 'text' ? ' trade-sell__location-tab--active' : ''}`}
+              onClick={() => setLocationMode('text')}
+            >
+              직접 입력
+            </button>
+          </div>
+
+          {locationMode === 'map' ? (
+            <LocationPicker
+              value={{
+                latitude: form.latitude,
+                longitude: form.longitude,
+                address: form.address,
+                neighborhood: form.neighborhood,
+              }}
+              onChange={(loc) =>
+                setForm((prev) => ({
+                  ...prev,
+                  latitude: loc.latitude,
+                  longitude: loc.longitude,
+                  address: loc.address,
+                  neighborhood: loc.neighborhood || prev.neighborhood,
+                }))
+              }
+            />
+          ) : (
+            <>
+              <input
+                id="trade-neighborhood"
+                className="trade-sell__input"
+                type="text"
+                placeholder="예: 역삼동"
+                value={form.neighborhood}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    neighborhood: e.target.value,
+                    latitude: null,
+                    longitude: null,
+                    address: '',
+                  }))
+                }
+              />
+              <p className="trade-sell__hint">동네 이름만 입력해도 등록할 수 있어요.</p>
+            </>
+          )}
         </section>
 
         {error && (

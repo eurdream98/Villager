@@ -30,6 +30,9 @@ export function formatAppointmentSummary(appointment) {
     methodLabel: method?.label ?? appointment.tradeMethod,
     time: formatAppointmentDateTime(appointment.scheduledAt),
     location: appointment.location,
+    latitude: appointment.latitude ?? null,
+    longitude: appointment.longitude ?? null,
+    address: appointment.address ?? '',
   };
 }
 
@@ -44,12 +47,47 @@ export function buildAppointmentSystemMessage(appointment, type) {
   return '';
 }
 
-export function validateAppointmentDraft({ tradeMethod, scheduledAt, location }) {
+export function seedAppointmentLocationFromListing(listingLocation) {
+  if (!listingLocation) {
+    return {
+      location: '',
+      latitude: null,
+      longitude: null,
+      address: '',
+    };
+  }
+  const text =
+    listingLocation.address?.trim() || listingLocation.neighborhood?.trim() || '';
+  return {
+    location: text,
+    latitude: listingLocation.latitude ?? null,
+    longitude: listingLocation.longitude ?? null,
+    address: listingLocation.address?.trim() || '',
+  };
+}
+
+export function validateAppointmentDraft({
+  tradeMethod,
+  scheduledAt,
+  location,
+  locationMode,
+  mapLocation,
+}) {
   if (!tradeMethod) return '거래 방법을 선택해 주세요.';
   if (!scheduledAt) return '거래 시간을 선택해 주세요.';
   const at = new Date(scheduledAt);
   if (Number.isNaN(at.getTime())) return '올바른 거래 시간을 입력해 주세요.';
   if (at.getTime() < Date.now() - 60000) return '거래 시간은 현재 이후로 설정해 주세요.';
+
+  if (locationMode === 'map') {
+    if (mapLocation?.latitude == null || mapLocation?.longitude == null) {
+      return '지도에서 거래 장소를 선택해 주세요.';
+    }
+    const label = mapLocation.address?.trim() || location?.trim();
+    if (!label) return '거래 장소 주소를 확인해 주세요.';
+    return null;
+  }
+
   if (!location?.trim()) return '거래 장소를 입력해 주세요.';
   return null;
 }

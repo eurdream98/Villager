@@ -796,7 +796,28 @@
 .trade-detail__gallery-more:hover {
   background: rgba(27, 67, 50, 0.9);
 }
-
+.trade-sell__location-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.trade-sell__location-tab {
+  flex: 1;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #b7e4c7;
+  border-radius: 8px;
+  background: #fff;
+  color: #52796f;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.trade-sell__location-tab--active {
+  border-color: #2d6a4f;
+  background: #d8f3dc;
+  color: #1b4332;
+  font-weight: 600;
+}
 /* —— 상세 사진 원본 뷰어 —— */
 
 .trade-detail-lightbox {
@@ -1633,6 +1654,26 @@
   font-size: 0.9rem;
   font-weight: 600;
   color: #1b4332;
+}
+
+.trade-apt__map-link {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #2d6a4f;
+  text-decoration: underline;
+}
+
+.trade-apt__hint--listing-loc {
+  margin: 0 0 0.5rem;
+}
+
+.trade-detail__location-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #1b4332;
+  line-height: 1.45;
 }
 
 .trade-apt__hint {

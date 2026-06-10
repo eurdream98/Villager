@@ -1,9 +1,11 @@
 import { usableListingImageUrls } from '../../lib/listingImages';
+import { formatListingLocation } from '../../lib/listingLocation';
 import { formatPrice } from '../../lib/trade';
 import './Trade.css';
 
 function TradeListingCard({ listing, onClick }) {
   const thumb = usableListingImageUrls(listing.imageUrls)[0];
+  const locationLabel = formatListingLocation(listing);
 
   return (
     <article className="trade-card">
@@ -36,7 +38,7 @@ function TradeListingCard({ listing, onClick }) {
             {formatPrice(listing.price, listing.isFree)}
           </p>
           <p className="trade-card__meta">
-            {listing.neighborhood} · {listing.createdAt}
+            {locationLabel || '동네 미정'} · {listing.createdAt}
           </p>
         </div>
       </button>

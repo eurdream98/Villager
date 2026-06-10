@@ -8,4 +8,7 @@ import java.time.Instant;
 public record ProposeAppointmentRequest(
     @NotBlank String tradeMethod,
     @NotNull Instant scheduledAt,
-    @NotBlank @Size(max = 200) String location) {}
+    @NotBlank @Size(max = 200) String location,
+    Double latitude,
+    Double longitude,
+    @Size(max = 200) String address) {}

@@ -12,6 +12,9 @@ function mapListing(row) {
     imageUrls: usableListingImageUrls(row.imageUrls),
     tradeMethods: row.tradeMethods ?? [],
     neighborhood: row.neighborhood ?? '',
+    latitude: row.latitude ?? null,
+    longitude: row.longitude ?? null,
+    address: row.address ?? '',
     sellerId: row.sellerId,
     sellerName: row.sellerName ?? '판매자',
     createdAt: row.createdAt ?? '',
@@ -36,6 +39,9 @@ export async function createTradeListingFromApi(form) {
     isFree: form.isFree,
     price: form.isFree ? 0 : Number(form.price),
     neighborhood: form.neighborhood ?? '',
+    latitude: form.latitude ?? null,
+    longitude: form.longitude ?? null,
+    address: form.address ?? '',
     imageUrls: form.imageUrls ?? [],
   };
   const data = await apiFetch('/api/v1/listings', {

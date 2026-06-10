@@ -34,6 +34,10 @@ public class TradeAppointment {
   private Instant scheduledAt;
 
   private String location;
+  private Double latitude;
+  private Double longitude;
+  private String address;
+
   @Enumerated(EnumType.STRING)
   @JdbcTypeCode(SqlTypes.NAMED_ENUM)
   @Column(name = "status", columnDefinition = "appointment_status")

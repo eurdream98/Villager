@@ -79,6 +79,9 @@ public class ListingService {
     listing.setFree(request.isFree());
     listing.setPrice(request.isFree() ? 0 : request.price());
     listing.setNeighborhood(request.neighborhood());
+    listing.setLatitude(request.latitude());
+    listing.setLongitude(request.longitude());
+    listing.setAddress(request.address() != null ? request.address().trim() : null);
     listing.setStatus(STATUS_ACTIVE);
     listing.setCreatedAt(now);
     listing.setUpdatedAt(now);
@@ -136,6 +139,9 @@ public class ListingService {
           listing.isFree(),
           imagesByListing.getOrDefault(listing.getId(), List.of()),
           listing.getNeighborhood() != null ? listing.getNeighborhood() : "",
+          listing.getLatitude(),
+          listing.getLongitude(),
+          listing.getAddress() != null ? listing.getAddress() : "",
           listing.getSellerId(),
           sellerName,
           TimeFormatUtil.relative(listing.getCreatedAt()),

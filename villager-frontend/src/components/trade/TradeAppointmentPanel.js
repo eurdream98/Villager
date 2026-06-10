@@ -1,13 +1,52 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   APPOINTMENT_STATUS,
   formatAppointmentSummary,
   getLocationPlaceholder,
+  seedAppointmentLocationFromListing,
   validateAppointmentDraft,
 } from '../../lib/appointment';
+import { buildKakaoMapLink } from '../../lib/listingLocation';
 import { TRADE_METHODS } from '../../lib/trade';
 import { isSameUser } from '../../lib/userId';
+import LocationPicker from './LocationPicker';
 import './Trade.css';
+
+function AppointmentMapLink({ appointment }) {
+  const summary = formatAppointmentSummary(appointment);
+  const href = buildKakaoMapLink({
+    label: summary.address || summary.location,
+    latitude: summary.latitude,
+    longitude: summary.longitude,
+  });
+  if (!href) return null;
+  return (
+    <>
+      <br />
+      <a
+        className="trade-apt__map-link"
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        카카오맵에서 보기
+      </a>
+    </>
+  );
+}
+
+function AppointmentLocationSummary({ appointment }) {
+  const summary = formatAppointmentSummary(appointment);
+  return (
+    <div>
+      <dt>거래 장소</dt>
+      <dd>
+        {summary.location}
+        <AppointmentMapLink appointment={appointment} />
+      </dd>
+    </div>
+  );
+}
 
 function TradeAppointmentPanel({
   appointment,
@@ -15,6 +54,7 @@ function TradeAppointmentPanel({
   currentUserId,
   sellerId,
   listingFree,
+  listingLocation,
   sellerPayoutVerified,
   onOpenPayoutAccount,
   onPropose,
@@ -24,7 +64,13 @@ function TradeAppointmentPanel({
   const [expanded, setExpanded] = useState(false);
   const [tradeMethod, setTradeMethod] = useState('meet');
   const [scheduledAt, setScheduledAt] = useState('');
-  const [location, setLocation] = useState('');
+  const [locationMode, setLocationMode] = useState('map');
+  const [locationText, setLocationText] = useState('');
+  const [mapLocation, setMapLocation] = useState({
+    latitude: null,
+    longitude: null,
+    address: '',
+  });
   const [error, setError] = useState(null);
 
   const isSeller = currentUserId === sellerId;
@@ -32,19 +78,60 @@ function TradeAppointmentPanel({
   const isEscrowDraft =
     !listingFree && (tradeMethod === 'shipping' || tradeMethod === 'door');
 
+  useEffect(() => {
+    if (!expanded) return;
+    const seeded = seedAppointmentLocationFromListing(listingLocation);
+    setLocationText(seeded.location);
+    setMapLocation({
+      latitude: seeded.latitude,
+      longitude: seeded.longitude,
+      address: seeded.address,
+    });
+  }, [expanded, listingLocation]);
+
+  useEffect(() => {
+    if (!expanded) return;
+    setLocationMode(tradeMethod === 'meet' ? 'map' : 'text');
+  }, [expanded, tradeMethod]);
+
+  const handleTradeMethodChange = (methodId) => {
+    setTradeMethod(methodId);
+    if (methodId === 'meet') {
+      setLocationMode('map');
+    } else {
+      setLocationMode('text');
+    }
+  };
+
   const handlePropose = (e) => {
     e.preventDefault();
     setError(null);
+
+    const locationSummary =
+      locationMode === 'map'
+        ? (mapLocation.address || locationText).trim()
+        : locationText.trim();
+
     const validationError = validateAppointmentDraft({
       tradeMethod,
       scheduledAt,
-      location,
+      location: locationSummary,
+      locationMode,
+      mapLocation,
     });
     if (validationError) {
       setError(validationError);
       return;
     }
-    onPropose({ tradeMethod, scheduledAt, location });
+
+    onPropose({
+      tradeMethod,
+      scheduledAt,
+      location: locationSummary,
+      latitude: locationMode === 'map' ? mapLocation.latitude : null,
+      longitude: locationMode === 'map' ? mapLocation.longitude : null,
+      address: locationMode === 'map' ? mapLocation.address || '' : '',
+    });
     setExpanded(false);
   };
 
@@ -74,10 +161,7 @@ function TradeAppointmentPanel({
             <dt>거래 시간</dt>
             <dd>{summary.time}</dd>
           </div>
-          <div>
-            <dt>거래 장소</dt>
-            <dd>{summary.location}</dd>
-          </div>
+          <AppointmentLocationSummary appointment={appointment} />
         </dl>
         {isMeet && (
           <p className="trade-apt__hint trade-apt__hint--meet">
@@ -122,10 +206,7 @@ function TradeAppointmentPanel({
             <dt>거래 시간</dt>
             <dd>{summary.time}</dd>
           </div>
-          <div>
-            <dt>거래 장소</dt>
-            <dd>{summary.location}</dd>
-          </div>
+          <AppointmentLocationSummary appointment={appointment} />
         </dl>
         {isSeller
           && isProposer
@@ -208,7 +289,7 @@ function TradeAppointmentPanel({
                       name="apt-method"
                       value={m.id}
                       checked={tradeMethod === m.id}
-                      onChange={() => setTradeMethod(m.id)}
+                      onChange={() => handleTradeMethodChange(m.id)}
                     />
                     <span>{m.label}</span>
                     {m.id === 'meet' && (
@@ -237,19 +318,64 @@ function TradeAppointmentPanel({
             required
           />
 
-          <label className="trade-apt__legend" htmlFor="apt-location">
-            거래 장소
-          </label>
-          <input
-            id="apt-location"
-            className="trade-apt__input"
-            type="text"
-            placeholder={getLocationPlaceholder(tradeMethod)}
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            maxLength={200}
-            required
-          />
+          <span className="trade-apt__legend">거래 장소</span>
+          {listingLocation && (listingLocation.address || listingLocation.neighborhood) && (
+            <p className="trade-apt__hint trade-apt__hint--listing-loc">
+              판매자 희망 위치를 기본값으로 불러왔어요. 약속에 맞게 다시 정해 주세요.
+            </p>
+          )}
+
+          <div className="trade-sell__location-tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={locationMode === 'map'}
+              className={`trade-sell__location-tab${locationMode === 'map' ? ' trade-sell__location-tab--active' : ''}`}
+              onClick={() => setLocationMode('map')}
+            >
+              지도로 찍기
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={locationMode === 'text'}
+              className={`trade-sell__location-tab${locationMode === 'text' ? ' trade-sell__location-tab--active' : ''}`}
+              onClick={() => setLocationMode('text')}
+            >
+              직접 입력
+            </button>
+          </div>
+
+          {locationMode === 'map' ? (
+            <LocationPicker
+              value={{
+                latitude: mapLocation.latitude,
+                longitude: mapLocation.longitude,
+                address: mapLocation.address,
+              }}
+              onChange={(loc) => {
+                setMapLocation({
+                  latitude: loc.latitude,
+                  longitude: loc.longitude,
+                  address: loc.address ?? '',
+                });
+                if (loc.address) {
+                  setLocationText(loc.address);
+                }
+              }}
+            />
+          ) : (
+            <input
+              id="apt-location"
+              className="trade-apt__input"
+              type="text"
+              placeholder={getLocationPlaceholder(tradeMethod)}
+              value={locationText}
+              onChange={(e) => setLocationText(e.target.value)}
+              maxLength={200}
+              required
+            />
+          )}
 
           {isSeller && isEscrowDraft && sellerPayoutVerified === false && (
             <p className="trade-apt__hint trade-apt__hint--warn">

@@ -151,6 +151,11 @@ public class ConversationService {
       UUID peerId = isBuyer ? c.getSellerId() : c.getBuyerId();
       String role = isBuyer ? "buyer" : "seller";
 
+      Double listingLat = listing != null ? listing.getLatitude() : null;
+      Double listingLng = listing != null ? listing.getLongitude() : null;
+      String listingAddr =
+          listing != null && listing.getAddress() != null ? listing.getAddress() : "";
+
       result.add(toSummaryDto(
           c,
           userId,
@@ -159,6 +164,9 @@ public class ConversationService {
           price,
           isFree,
           neighborhood,
+          listingLat,
+          listingLng,
+          listingAddr,
           peerId,
           role,
           appointmentStatusByConversation.getOrDefault(c.getId(), "none"),
@@ -247,6 +255,9 @@ public class ConversationService {
           price,
           isFree,
           neighborhood,
+          listing.getLatitude(),
+          listing.getLongitude(),
+          listing.getAddress() != null ? listing.getAddress() : "",
           peerId,
           role,
           appointmentStatusByConversation.getOrDefault(c.getId(), "none"),
@@ -334,6 +345,9 @@ public class ConversationService {
       int listingPrice,
       boolean listingFree,
       String neighborhood,
+      Double listingLatitude,
+      Double listingLongitude,
+      String listingAddress,
       UUID peerId,
       String role,
       String appointmentStatus,
@@ -347,6 +361,9 @@ public class ConversationService {
         listingPrice,
         listingFree,
         neighborhood,
+        listingLatitude,
+        listingLongitude,
+        listingAddress,
         c.getBuyerId(),
         c.getSellerId(),
         role,

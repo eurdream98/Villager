@@ -174,6 +174,9 @@ function TradePage({ user, member, onOpenPayoutAccount }) {
       listingPrice: selectedListing.price,
       listingFree: selectedListing.isFree,
       neighborhood: selectedListing.neighborhood,
+      listingLatitude: selectedListing.latitude,
+      listingLongitude: selectedListing.longitude,
+      listingAddress: selectedListing.address,
       role: isSeller ? 'seller' : 'buyer',
     };
     return (

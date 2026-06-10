@@ -10,4 +10,8 @@ public record CreateListingRequest(
     boolean isFree,
     Integer price,
     @Size(max = 100) String neighborhood,
-    List<@NotBlank String> imageUrls) {}
+    List<@NotBlank String> imageUrls,
+    Double latitude,
+    Double longitude,
+    @Size(max=200) String address
+) {}

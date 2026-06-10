@@ -3,6 +3,7 @@ import { markConversationRead } from '../../lib/chatApi';
 import { usePayoutAccount } from '../../hooks/usePayoutAccount';
 import { useTradeChat } from '../../hooks/useTradeChat';
 import { resolveListingImageUrl } from '../../lib/listingImages';
+import { listingLocationFromTradeInfo } from '../../lib/listingLocation';
 import { formatPrice } from '../../lib/trade';
 import TradeAppointmentPanel from './TradeAppointmentPanel';
 import TradeEscrowPanel from './TradeEscrowPanel';
@@ -58,6 +59,7 @@ function TradeChatScreen({
 
   const isSeller = user?.id === sellerId;
   const listingFree = tradeInfo?.listingFree ?? false;
+  const listingLocation = listingLocationFromTradeInfo(tradeInfo);
   const { isVerified: sellerPayoutVerified } = usePayoutAccount(
     isSeller && !listingFree,
   );
@@ -157,6 +159,7 @@ function TradeChatScreen({
         currentUserId={user.id}
         sellerId={sellerId}
         listingFree={listingFree}
+        listingLocation={listingLocation}
         sellerPayoutVerified={sellerPayoutVerified}
         onOpenPayoutAccount={onOpenPayoutAccount}
         onPropose={proposeAppointment}

@@ -29,6 +29,9 @@ public class TradeListing {
   private UUID neighborhoodId;
 
   private String neighborhood;
+  private Double latitude;
+  private Double longitude;
+  private String address;
   private String title;
   private String description;
   private Integer price;

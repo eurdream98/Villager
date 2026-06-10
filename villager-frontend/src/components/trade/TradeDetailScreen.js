@@ -1,5 +1,7 @@
 import { usableListingImageUrls } from '../../lib/listingImages';
+import { formatListingLocation, hasListingMapPoint } from '../../lib/listingLocation';
 import { formatPrice } from '../../lib/trade';
+import LocationPicker from './LocationPicker';
 import TradeChatScreen from './TradeChatScreen';
 import TradeDetailBuyerStarter from './TradeDetailBuyerStarter';
 import TradeDetailChats from './TradeDetailChats';
@@ -30,8 +32,13 @@ function TradeDetailScreen({
     listingPrice: listing.price,
     listingFree: listing.isFree,
     neighborhood: listing.neighborhood,
+    listingLatitude: listing.latitude,
+    listingLongitude: listing.longitude,
+    listingAddress: listing.address,
     role: 'buyer',
   };
+
+  const listingLocationLabel = formatListingLocation(listing);
 
   return (
     <div className="trade-detail">
@@ -115,9 +122,28 @@ function TradeDetailScreen({
           </p>
           <h1 className="trade-detail__title">{listing.title}</h1>
           <p className="trade-detail__meta">
-            {listing.neighborhood} · {listing.createdAt}
+            {listingLocationLabel || '동네 미정'} · {listing.createdAt}
             {listing.sellerName && ` · ${listing.sellerName}`}
           </p>
+
+          {listingLocationLabel && (
+            <section className="trade-detail__section">
+              <h2 className="trade-detail__section-title">거래 희망 위치</h2>
+              {hasListingMapPoint(listing) ? (
+                <LocationPicker
+                  readOnly
+                  compact
+                  value={{
+                    latitude: listing.latitude,
+                    longitude: listing.longitude,
+                    address: listing.address || listing.neighborhood,
+                  }}
+                />
+              ) : (
+                <p className="trade-detail__location-text">{listingLocationLabel}</p>
+              )}
+            </section>
+          )}
 
           {listing.description && (
             <section className="trade-detail__section">

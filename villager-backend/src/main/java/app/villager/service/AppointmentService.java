@@ -69,6 +69,12 @@ public class AppointmentService {
     appointment.setTradeMethod(parseTradeMethod(request.tradeMethod()));
     appointment.setScheduledAt(request.scheduledAt());
     appointment.setLocation(request.location().trim());
+    appointment.setLatitude(request.latitude());
+    appointment.setLongitude(request.longitude());
+    appointment.setAddress(
+        request.address() != null && !request.address().isBlank()
+            ? request.address().trim()
+            : null);
     appointment.setStatus(AppointmentStatus.pending);
     appointment.setProposedBy(userId);
     appointment.setCreatedAt(now);
@@ -167,6 +173,9 @@ public class AppointmentService {
         apt.getTradeMethod().name(),
         TimeFormatUtil.iso(apt.getScheduledAt()),
         apt.getLocation(),
+        apt.getLatitude(),
+        apt.getLongitude(),
+        apt.getAddress() != null ? apt.getAddress() : "",
         apt.getStatus().name(),
         apt.getProposedBy(),
         profileService.displayName(apt.getProposedBy()),
