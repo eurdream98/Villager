@@ -1,5 +1,11 @@
 import { getTradeMethod } from './trade';
 
+export const LOCATION_MODES = {
+  ADDRESS: 'address',
+  MAP: 'map',
+  LABEL: 'label',
+}
+
 export const APPOINTMENT_STATUS = {
   PENDING: 'pending',
   CONFIRMED: 'confirmed',
@@ -79,12 +85,26 @@ export function validateAppointmentDraft({
   if (Number.isNaN(at.getTime())) return '올바른 거래 시간을 입력해 주세요.';
   if (at.getTime() < Date.now() - 60000) return '거래 시간은 현재 이후로 설정해 주세요.';
 
-  if (locationMode === 'map') {
+  if (locationMode === LOCATION_MODES.MAP) {
     if (mapLocation?.latitude == null || mapLocation?.longitude == null) {
       return '지도에서 거래 장소를 선택해 주세요.';
     }
     const label = mapLocation.address?.trim() || location?.trim();
     if (!label) return '거래 장소 주소를 확인해 주세요.';
+    return null;
+  }
+
+  if (locationMode === LOCATION_MODES.ADDRESS) {
+    // 도로명 검색: 좌표 필수 (mapLocation에 검색 결과를 넣을 예정)
+    if (mapLocation?.latitude == null || mapLocation?.longitude == null) {
+      return '주소를 검색해서 선택해 주세요.';
+    }
+    if (!mapLocation.address?.trim()) return '검색한 주소를 선택해 주세요.';
+    return null;
+  }
+  if (locationMode === LOCATION_MODES.LABEL) {
+    // 장소 이름: 텍스트만, 좌표 검사 안 함
+    if (!location?.trim()) return '만남 장소 이름을 입력해 주세요.';
     return null;
   }
 

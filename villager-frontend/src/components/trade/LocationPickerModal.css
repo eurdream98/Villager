@@ -1,0 +1,85 @@
+.location-picker-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.location-picker-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(27, 67, 50, 0.5);
+}
+
+.location-picker-modal__panel {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  max-height: min(92vh, 720px);
+  display: flex;
+  flex-direction: column;
+  padding: 1.1rem;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.location-picker-modal__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1b4332;
+}
+
+.location-picker-modal__desc {
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #52796f;
+}
+
+.location-picker-modal__panel .location-picker {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.location-picker-modal__panel .location-picker__map--modal {
+  height: min(420px, 48vh);
+  min-height: 260px;
+}
+
+.location-picker-modal__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+  flex-shrink: 0;
+}
+
+.location-picker-modal__btn {
+  flex: 1;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #d8e2dc;
+  border-radius: 10px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #52796f;
+  cursor: pointer;
+}
+
+.location-picker-modal__btn--primary {
+  background: #2d6a4f;
+  border-color: #2d6a4f;
+  color: #fff;
+}
+
+.location-picker-modal__btn--primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

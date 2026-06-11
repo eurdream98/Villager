@@ -798,9 +798,28 @@
 }
 .trade-sell__location-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
+
+.trade-sell__location-tabs--triple .trade-sell__location-tab {
+  flex: 1 1 calc(33.333% - 0.35rem);
+  min-width: 5.5rem;
+  padding: 0.5rem 0.45rem;
+  font-size: 0.8rem;
+}
+
+.trade-sell__hint--appointment-loc {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  border-radius: 8px;
+  background: #f0f7f4;
+  border: 1px solid #d8f3dc;
+  color: #52796f;
+  line-height: 1.5;
+}
+
 .trade-sell__location-tab {
   flex: 1;
   padding: 0.55rem 0.75rem;
@@ -1186,10 +1205,9 @@
 .trade-chat--embedded .trade-appointment,
 .trade-chat--embedded .trade-escrow {
   flex-shrink: 0;
-  max-height: 38%;
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
   font-size: 0.8rem;
-  -webkit-overflow-scrolling: touch;
 }
 
 .trade-chat__composer--embedded {

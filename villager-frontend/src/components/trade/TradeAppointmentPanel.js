@@ -9,6 +9,7 @@ import {
 import { buildKakaoMapLink } from '../../lib/listingLocation';
 import { TRADE_METHODS } from '../../lib/trade';
 import { isSameUser } from '../../lib/userId';
+import AppointmentScheduleModal from './AppointmentScheduleModal';
 import LocationPicker from './LocationPicker';
 import './Trade.css';
 
@@ -56,12 +57,14 @@ function TradeAppointmentPanel({
   listingFree,
   listingLocation,
   sellerPayoutVerified,
+  useFormModal = false,
   onOpenPayoutAccount,
   onPropose,
   onConfirm,
   onReset,
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [formModalOpen, setFormModalOpen] = useState(false);
   const [tradeMethod, setTradeMethod] = useState('meet');
   const [scheduledAt, setScheduledAt] = useState('');
   const [locationMode, setLocationMode] = useState('map');
@@ -77,9 +80,10 @@ function TradeAppointmentPanel({
   const roleLabel = isSeller ? '판매자' : '구매자';
   const isEscrowDraft =
     !listingFree && (tradeMethod === 'shipping' || tradeMethod === 'door');
+  const isFormOpen = useFormModal ? formModalOpen : expanded;
 
   useEffect(() => {
-    if (!expanded) return;
+    if (!isFormOpen) return;
     const seeded = seedAppointmentLocationFromListing(listingLocation);
     setLocationText(seeded.location);
     setMapLocation({
@@ -87,12 +91,28 @@ function TradeAppointmentPanel({
       longitude: seeded.longitude,
       address: seeded.address,
     });
-  }, [expanded, listingLocation]);
+  }, [isFormOpen, listingLocation]);
 
   useEffect(() => {
-    if (!expanded) return;
+    if (!isFormOpen) return;
     setLocationMode(tradeMethod === 'meet' ? 'map' : 'text');
-  }, [expanded, tradeMethod]);
+  }, [isFormOpen, tradeMethod]);
+
+  const closeForm = () => {
+    if (useFormModal) {
+      setFormModalOpen(false);
+    } else {
+      setExpanded(false);
+    }
+  };
+
+  const openForm = () => {
+    if (useFormModal) {
+      setFormModalOpen(true);
+    } else {
+      setExpanded(true);
+    }
+  };
 
   const handleTradeMethodChange = (methodId) => {
     setTradeMethod(methodId);
@@ -132,7 +152,7 @@ function TradeAppointmentPanel({
       longitude: locationMode === 'map' ? mapLocation.longitude : null,
       address: locationMode === 'map' ? mapLocation.address || '' : '',
     });
-    setExpanded(false);
+    closeForm();
   };
 
   const handleConfirm = async () => {
@@ -142,6 +162,142 @@ function TradeAppointmentPanel({
       setError(err.message || '약속 수락에 실패했습니다.');
     }
   };
+
+  const proposeForm = (
+    <form className="trade-apt__form" onSubmit={handlePropose}>
+      <fieldset className="trade-apt__fieldset">
+        <legend className="trade-apt__legend">거래 방법</legend>
+        <ul className="trade-apt__methods">
+          {TRADE_METHODS.map((m) => (
+            <li key={m.id}>
+              <label className="trade-apt__method-label">
+                <input
+                  type="radio"
+                  name="apt-method"
+                  value={m.id}
+                  checked={tradeMethod === m.id}
+                  onChange={() => handleTradeMethodChange(m.id)}
+                />
+                <span>{m.label}</span>
+                {m.id === 'meet' && (
+                  <span className="trade-apt__method-note">현장 결제</span>
+                )}
+                {(m.id === 'shipping' || m.id === 'door') && (
+                  <span className="trade-apt__method-note trade-apt__method-note--escrow">
+                    에스크로
+                  </span>
+                )}
+              </label>
+            </li>
+          ))}
+        </ul>
+      </fieldset>
+
+      <label className="trade-apt__legend" htmlFor="apt-time">
+        거래 시간
+      </label>
+      <input
+        id="apt-time"
+        className="trade-apt__input"
+        type="datetime-local"
+        value={scheduledAt}
+        onChange={(e) => setScheduledAt(e.target.value)}
+        required
+      />
+
+      <span className="trade-apt__legend">거래 장소</span>
+      {listingLocation && (listingLocation.address || listingLocation.neighborhood) && (
+        <p className="trade-apt__hint trade-apt__hint--listing-loc">
+          판매자 희망 위치를 기본값으로 불러왔어요. 약속에 맞게 다시 정해 주세요.
+        </p>
+      )}
+
+      <div className="trade-sell__location-tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={locationMode === 'map'}
+          className={`trade-sell__location-tab${locationMode === 'map' ? ' trade-sell__location-tab--active' : ''}`}
+          onClick={() => setLocationMode('map')}
+        >
+          지도로 찍기
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={locationMode === 'text'}
+          className={`trade-sell__location-tab${locationMode === 'text' ? ' trade-sell__location-tab--active' : ''}`}
+          onClick={() => setLocationMode('text')}
+        >
+          직접 입력
+        </button>
+      </div>
+
+      {locationMode === 'map' ? (
+        <LocationPicker
+          value={{
+            latitude: mapLocation.latitude,
+            longitude: mapLocation.longitude,
+            address: mapLocation.address,
+          }}
+          onChange={(loc) => {
+            setMapLocation({
+              latitude: loc.latitude,
+              longitude: loc.longitude,
+              address: loc.address ?? '',
+            });
+            if (loc.address) {
+              setLocationText(loc.address);
+            }
+          }}
+        />
+      ) : (
+        <input
+          id="apt-location"
+          className="trade-apt__input"
+          type="text"
+          placeholder={getLocationPlaceholder(tradeMethod)}
+          value={locationText}
+          onChange={(e) => setLocationText(e.target.value)}
+          maxLength={200}
+          required
+        />
+      )}
+
+      {isSeller && isEscrowDraft && sellerPayoutVerified === false && (
+        <p className="trade-apt__hint trade-apt__hint--warn">
+          택배·문고리 에스크로는 <strong>정산 계좌 인증</strong>이 필요합니다.
+          {onOpenPayoutAccount ? (
+            <>
+              {' '}
+              <button
+                type="button"
+                className="trade-apt__link"
+                onClick={onOpenPayoutAccount}
+              >
+                정산 계좌 등록
+              </button>
+            </>
+          ) : (
+            ' 상단 메뉴 「정산 계좌」에서 등록해 주세요.'
+          )}
+        </p>
+      )}
+
+      {error && (
+        <p className="trade-apt__error" role="alert">
+          {error}
+        </p>
+      )}
+
+      <button type="submit" className="trade-apt__btn trade-apt__btn--primary">
+        약속 제안하기
+      </button>
+      <p className="trade-apt__hint">
+        제안 후 상대방({isSeller ? '구매자' : '판매자'})이 확정하면 약속이 확정됩니다.
+      </p>
+    </form>
+  );
 
   if (appointment?.status === APPOINTMENT_STATUS.CONFIRMED) {
     const summary = formatAppointmentSummary(appointment);
@@ -270,146 +426,18 @@ function TradeAppointmentPanel({
       <button
         type="button"
         className="trade-apt__toggle"
-        onClick={() => setExpanded((v) => !v)}
-        aria-expanded={expanded}
+        onClick={useFormModal ? openForm : () => setExpanded((v) => !v)}
+        aria-expanded={useFormModal ? formModalOpen : expanded}
       >
-        📅 약속 잡기 {expanded ? '▲' : '▼'}
+        📅 약속 잡기 {useFormModal ? '' : expanded ? '▲' : '▼'}
       </button>
 
-      {expanded && (
-        <form className="trade-apt__form" onSubmit={handlePropose}>
-          <fieldset className="trade-apt__fieldset">
-            <legend className="trade-apt__legend">거래 방법</legend>
-            <ul className="trade-apt__methods">
-              {TRADE_METHODS.map((m) => (
-                <li key={m.id}>
-                  <label className="trade-apt__method-label">
-                    <input
-                      type="radio"
-                      name="apt-method"
-                      value={m.id}
-                      checked={tradeMethod === m.id}
-                      onChange={() => handleTradeMethodChange(m.id)}
-                    />
-                    <span>{m.label}</span>
-                    {m.id === 'meet' && (
-                      <span className="trade-apt__method-note">현장 결제</span>
-                    )}
-                    {(m.id === 'shipping' || m.id === 'door') && (
-                      <span className="trade-apt__method-note trade-apt__method-note--escrow">
-                        에스크로
-                      </span>
-                    )}
-                  </label>
-                </li>
-              ))}
-            </ul>
-          </fieldset>
-
-          <label className="trade-apt__legend" htmlFor="apt-time">
-            거래 시간
-          </label>
-          <input
-            id="apt-time"
-            className="trade-apt__input"
-            type="datetime-local"
-            value={scheduledAt}
-            onChange={(e) => setScheduledAt(e.target.value)}
-            required
-          />
-
-          <span className="trade-apt__legend">거래 장소</span>
-          {listingLocation && (listingLocation.address || listingLocation.neighborhood) && (
-            <p className="trade-apt__hint trade-apt__hint--listing-loc">
-              판매자 희망 위치를 기본값으로 불러왔어요. 약속에 맞게 다시 정해 주세요.
-            </p>
-          )}
-
-          <div className="trade-sell__location-tabs" role="tablist">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={locationMode === 'map'}
-              className={`trade-sell__location-tab${locationMode === 'map' ? ' trade-sell__location-tab--active' : ''}`}
-              onClick={() => setLocationMode('map')}
-            >
-              지도로 찍기
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={locationMode === 'text'}
-              className={`trade-sell__location-tab${locationMode === 'text' ? ' trade-sell__location-tab--active' : ''}`}
-              onClick={() => setLocationMode('text')}
-            >
-              직접 입력
-            </button>
-          </div>
-
-          {locationMode === 'map' ? (
-            <LocationPicker
-              value={{
-                latitude: mapLocation.latitude,
-                longitude: mapLocation.longitude,
-                address: mapLocation.address,
-              }}
-              onChange={(loc) => {
-                setMapLocation({
-                  latitude: loc.latitude,
-                  longitude: loc.longitude,
-                  address: loc.address ?? '',
-                });
-                if (loc.address) {
-                  setLocationText(loc.address);
-                }
-              }}
-            />
-          ) : (
-            <input
-              id="apt-location"
-              className="trade-apt__input"
-              type="text"
-              placeholder={getLocationPlaceholder(tradeMethod)}
-              value={locationText}
-              onChange={(e) => setLocationText(e.target.value)}
-              maxLength={200}
-              required
-            />
-          )}
-
-          {isSeller && isEscrowDraft && sellerPayoutVerified === false && (
-            <p className="trade-apt__hint trade-apt__hint--warn">
-              택배·문고리 에스크로는 <strong>정산 계좌 인증</strong>이 필요합니다.
-              {onOpenPayoutAccount ? (
-                <>
-                  {' '}
-                  <button
-                    type="button"
-                    className="trade-apt__link"
-                    onClick={onOpenPayoutAccount}
-                  >
-                    정산 계좌 등록
-                  </button>
-                </>
-              ) : (
-                ' 상단 메뉴 「정산 계좌」에서 등록해 주세요.'
-              )}
-            </p>
-          )}
-
-          {error && (
-            <p className="trade-apt__error" role="alert">
-              {error}
-            </p>
-          )}
-
-          <button type="submit" className="trade-apt__btn trade-apt__btn--primary">
-            약속 제안하기
-          </button>
-          <p className="trade-apt__hint">
-            제안 후 상대방({isSeller ? '구매자' : '판매자'})이 확정하면 약속이 확정됩니다.
-          </p>
-        </form>
+      {useFormModal ? (
+        <AppointmentScheduleModal open={formModalOpen} onClose={closeForm}>
+          {proposeForm}
+        </AppointmentScheduleModal>
+      ) : (
+        expanded && proposeForm
       )}
     </div>
   );

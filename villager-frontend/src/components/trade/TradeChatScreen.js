@@ -161,6 +161,7 @@ function TradeChatScreen({
         listingFree={listingFree}
         listingLocation={listingLocation}
         sellerPayoutVerified={sellerPayoutVerified}
+        useFormModal={embedded}
         onOpenPayoutAccount={onOpenPayoutAccount}
         onPropose={proposeAppointment}
         onConfirm={confirmAppointment}

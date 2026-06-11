@@ -18,7 +18,20 @@ function TradeSellScreen({ user, onClose, onSubmit }) {
   const [previews, setPreviews] = useState([]);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [locationMode,setLocationMode] = useState('map');
+  const [locationMode, setLocationMode] = useState('map');
+
+  const handleLocationModeChange = (mode) => {
+    setLocationMode(mode);
+    if (mode === 'appointment') {
+      setForm((prev) => ({
+        ...prev,
+        neighborhood: '',
+        latitude: null,
+        longitude: null,
+        address: '',
+      }));
+    }
+  };
 
   const handlePhotos = (e) => {
     const files = Array.from(e.target.files ?? []);
@@ -188,13 +201,13 @@ function TradeSellScreen({ user, onClose, onSubmit }) {
         <section className="trade-sell__section">
           <span className="trade-sell__label">거래 위치 (선택)</span>
 
-          <div className="trade-sell__location-tabs" role="tablist">
+          <div className="trade-sell__location-tabs trade-sell__location-tabs--triple" role="tablist">
             <button
               type="button"
               role="tab"
               aria-selected={locationMode === 'map'}
               className={`trade-sell__location-tab${locationMode === 'map' ? ' trade-sell__location-tab--active' : ''}`}
-              onClick={() => setLocationMode('map')}
+              onClick={() => handleLocationModeChange('map')}
             >
               지도로 찍기
             </button>
@@ -203,9 +216,18 @@ function TradeSellScreen({ user, onClose, onSubmit }) {
               role="tab"
               aria-selected={locationMode === 'text'}
               className={`trade-sell__location-tab${locationMode === 'text' ? ' trade-sell__location-tab--active' : ''}`}
-              onClick={() => setLocationMode('text')}
+              onClick={() => handleLocationModeChange('text')}
             >
               직접 입력
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={locationMode === 'appointment'}
+              className={`trade-sell__location-tab${locationMode === 'appointment' ? ' trade-sell__location-tab--active' : ''}`}
+              onClick={() => handleLocationModeChange('appointment')}
+            >
+              약속으로 정하기
             </button>
           </div>
 
@@ -227,7 +249,7 @@ function TradeSellScreen({ user, onClose, onSubmit }) {
                 }))
               }
             />
-          ) : (
+          ) : locationMode === 'text' ? (
             <>
               <input
                 id="trade-neighborhood"
@@ -247,6 +269,11 @@ function TradeSellScreen({ user, onClose, onSubmit }) {
               />
               <p className="trade-sell__hint">동네 이름만 입력해도 등록할 수 있어요.</p>
             </>
+          ) : (
+            <p className="trade-sell__hint trade-sell__hint--appointment-loc">
+              거래 장소는 등록하지 않습니다. 채팅에서 약속 잡을 때 구매자와 함께 정해
+              주세요.
+            </p>
           )}
         </section>
 
