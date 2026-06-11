@@ -42,9 +42,10 @@ public class ListingController {
   }
 
   @GetMapping
-  List<ListingDto> list(Authentication auth) {
+  List<ListingDto> list(
+      Authentication auth, @RequestParam(required = false) List<UUID> neighborhoodIds) {
     UUID userId = currentUser.optionalUserId(auth).orElse(null);
-    return listingService.listActive(userId);
+    return listingService.listActive(userId, neighborhoodIds);
   }
 
   @GetMapping("/{id}")

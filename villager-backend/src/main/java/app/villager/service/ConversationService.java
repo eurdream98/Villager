@@ -41,6 +41,7 @@ public class ConversationService {
   private final TradeMessageRepository messageRepository;
   private final TradeAppointmentRepository appointmentRepository;
   private final ProfileService profileService;
+  private final NeighborhoodService neighborhoodService;
 
   public ConversationService(
       TradeConversationRepository conversationRepository,
@@ -48,13 +49,15 @@ public class ConversationService {
       TradeListingImageRepository imageRepository,
       TradeMessageRepository messageRepository,
       TradeAppointmentRepository appointmentRepository,
-      ProfileService profileService) {
+      ProfileService profileService,
+      NeighborhoodService neighborhoodService) {
     this.conversationRepository = conversationRepository;
     this.listingRepository = listingRepository;
     this.imageRepository = imageRepository;
     this.messageRepository = messageRepository;
     this.appointmentRepository = appointmentRepository;
     this.profileService = profileService;
+    this.neighborhoodService = neighborhoodService;
   }
 
   @Transactional
@@ -65,6 +68,8 @@ public class ConversationService {
     if (listing.getSellerId().equals(buyerId)) {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "본인 상품에는 채팅을 시작할 수 없습니다.");
     }
+
+    neighborhoodService.requireVerifiedForListing(buyerId, listing);
 
     TradeConversation conversation = conversationRepository
         .findByListingIdAndBuyerId(listingId, buyerId)

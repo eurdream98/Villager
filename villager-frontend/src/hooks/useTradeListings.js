@@ -2,15 +2,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { createTradeListingFromApi, fetchTradeListings } from '../lib/tradeApi';
 import { isApiEnabled } from '../lib/api';
 
-export function useTradeListings() {
+export function useTradeListings(neighborhoodIds) {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const idsKey = (neighborhoodIds ?? []).join(',');
 
   const reload = useCallback(() => {
     setLoading(true);
     setError(null);
-    fetchTradeListings()
+    fetchTradeListings(neighborhoodIds)
       .then((data) => {
         setListings(data);
         setLoading(false);
@@ -19,7 +20,7 @@ export function useTradeListings() {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }, [idsKey, neighborhoodIds]);
 
   useEffect(() => {
     reload();

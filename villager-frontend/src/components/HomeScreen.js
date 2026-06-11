@@ -7,18 +7,23 @@ import NeighborhoodTreeMapScreen from './growth/NeighborhoodTreeMapScreen';
 import { useChatUnread } from '../hooks/useChatUnread';
 import { useGrowthStats } from '../hooks/useGrowthStats';
 import { useMemberProfile } from '../hooks/useMemberProfile';
+import { useUserNeighborhoods } from '../hooks/useUserNeighborhoods';
 import BottomTabBar from './main/BottomTabBar';
 import ChatPage from './main/ChatPage';
 import CommunityPage from './main/CommunityPage';
 import JobsPage from './main/JobsPage';
 import MemberPanel from './main/MemberPanel';
 import TradePage from './main/TradePage';
+import NeighborhoodBar from './neighborhood/NeighborhoodBar';
+import NeighborhoodOnboardingModal from './neighborhood/NeighborhoodOnboardingModal';
+import NeighborhoodSettingsModal from './neighborhood/NeighborhoodSettingsModal';
 import './HomeScreen.css';
 
 function HomeScreen({ user }) {
   const [activeTab, setActiveTab] = useState('trade');
   const [overlay, setOverlay] = useState(null);
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const [neighborhoodSettingsOpen, setNeighborhoodSettingsOpen] = useState(false);
 
   const { member, loading: profileLoading } = useMemberProfile(user);
   const {
@@ -34,6 +39,7 @@ function HomeScreen({ user }) {
     error: growthError,
   } = useGrowthStats(user?.id);
   const { unreadTotal, refreshChatUnread } = useChatUnread(!!user, user?.id);
+  const neighborhoodState = useUserNeighborhoods(!!user);
 
   const openGrowth = () => setOverlay('growth');
   const openPayout = () => setOverlay('payout');
@@ -44,7 +50,14 @@ function HomeScreen({ user }) {
 
   const renderTabPage = () => {
     if (activeTab === 'trade') {
-      return <TradePage user={user} member={member} onOpenPayoutAccount={openPayout} />;
+      return (
+        <TradePage
+          user={user}
+          member={member}
+          neighborhoodState={neighborhoodState}
+          onOpenPayoutAccount={openPayout}
+        />
+      );
     }
     if (activeTab === 'chat') {
       return (
@@ -56,10 +69,19 @@ function HomeScreen({ user }) {
       );
     }
     if (activeTab === 'community') {
-      return <CommunityPage user={user} member={member} />;
+      return (
+        <CommunityPage user={user} member={member} neighborhoodState={neighborhoodState} />
+      );
     }
     if (activeTab === 'jobs') return <JobsPage />;
-    return <TradePage user={user} member={member} onOpenPayoutAccount={openPayout} />;
+    return (
+      <TradePage
+        user={user}
+        member={member}
+        neighborhoodState={neighborhoodState}
+        onOpenPayoutAccount={openPayout}
+      />
+    );
   };
 
   const handleLogout = async () => {
@@ -75,7 +97,15 @@ function HomeScreen({ user }) {
   return (
     <div className="home">
       <header className="home__header">
-        <h1 className="home__brand">Villager</h1>
+        <div className="home__header-start">
+          <h1 className="home__brand">Villager</h1>
+          <NeighborhoodBar
+            neighborhoods={neighborhoodState.neighborhoods}
+            activeSlot={neighborhoodState.activeSlot}
+            onSelectSlot={neighborhoodState.setActiveSlot}
+            onManage={() => setNeighborhoodSettingsOpen(true)}
+          />
+        </div>
         <MemberPanel
           member={member}
           loading={profileLoading}
@@ -126,6 +156,20 @@ function HomeScreen({ user }) {
           onClose={closeTreeMap}
         />
       )}
+
+      <NeighborhoodOnboardingModal
+        open={neighborhoodState.needsOnboarding}
+        onRegister={neighborhoodState.register}
+        onComplete={neighborhoodState.reload}
+      />
+
+      <NeighborhoodSettingsModal
+        open={neighborhoodSettingsOpen}
+        neighborhoods={neighborhoodState.neighborhoods}
+        onClose={() => setNeighborhoodSettingsOpen(false)}
+        onRegister={neighborhoodState.register}
+        onVerify={neighborhoodState.verify}
+      />
     </div>
   );
 }

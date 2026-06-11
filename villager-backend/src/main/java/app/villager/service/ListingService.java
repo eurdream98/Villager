@@ -1,11 +1,13 @@
 package app.villager.service;
 
 import app.villager.domain.ListingStatus;
+import app.villager.domain.Neighborhood;
 import app.villager.domain.Profile;
 import app.villager.domain.TradeListing;
 import app.villager.domain.TradeListingImage;
 import app.villager.dto.CreateListingRequest;
 import app.villager.dto.ListingDto;
+import app.villager.repository.NeighborhoodRepository;
 import app.villager.repository.ProfileRepository;
 import app.villager.repository.TradeListingImageRepository;
 import app.villager.repository.TradeListingRepository;
@@ -29,6 +31,8 @@ public class ListingService {
   private final TradeListingRepository listingRepository;
   private final TradeListingImageRepository imageRepository;
   private final ProfileRepository profileRepository;
+  private final NeighborhoodRepository neighborhoodRepository;
+  private final NeighborhoodService neighborhoodService;
   private final XpService xpService;
   private final ConversationService conversationService;
 
@@ -36,18 +40,35 @@ public class ListingService {
       TradeListingRepository listingRepository,
       TradeListingImageRepository imageRepository,
       ProfileRepository profileRepository,
+      NeighborhoodRepository neighborhoodRepository,
+      NeighborhoodService neighborhoodService,
       XpService xpService,
       ConversationService conversationService) {
     this.listingRepository = listingRepository;
     this.imageRepository = imageRepository;
     this.profileRepository = profileRepository;
+    this.neighborhoodRepository = neighborhoodRepository;
+    this.neighborhoodService = neighborhoodService;
     this.xpService = xpService;
     this.conversationService = conversationService;
   }
 
   @Transactional(readOnly = true)
-  public List<ListingDto> listActive(UUID userId) {
-    List<TradeListing> listings = listingRepository.findByStatusOrderByCreatedAtDesc(STATUS_ACTIVE);
+  public List<ListingDto> listActive(UUID userId, List<UUID> neighborhoodIds) {
+    List<TradeListing> listings;
+    if (neighborhoodIds != null && !neighborhoodIds.isEmpty()) {
+      listings = listingRepository.findByStatusAndNeighborhoodIdInOrderByCreatedAtDesc(
+          STATUS_ACTIVE, neighborhoodIds);
+    } else if (userId != null) {
+      List<UUID> registered = neighborhoodService.registeredNeighborhoodIds(userId);
+      if (registered.isEmpty()) {
+        return List.of();
+      }
+      listings = listingRepository.findByStatusAndNeighborhoodIdInOrderByCreatedAtDesc(
+          STATUS_ACTIVE, registered);
+    } else {
+      listings = listingRepository.findByStatusOrderByCreatedAtDesc(STATUS_ACTIVE);
+    }
     return mapListings(listings, userId);
   }
 
@@ -55,6 +76,9 @@ public class ListingService {
   public ListingDto getActive(UUID id, UUID userId) {
     TradeListing listing = listingRepository.findByIdAndStatus(id, STATUS_ACTIVE)
         .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."));
+    if (userId != null) {
+      neighborhoodService.requireVerifiedForListing(userId, listing);
+    }
     return mapListings(List.of(listing), userId).get(0);
   }
 
@@ -70,6 +94,10 @@ public class ListingService {
       throw new BusinessException(HttpStatus.BAD_REQUEST, "사진을 1장 이상 등록해 주세요.");
     }
 
+    Neighborhood neighborhood = neighborhoodRepository.findById(request.neighborhoodId())
+        .orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST, "동네를 찾을 수 없습니다."));
+    neighborhoodService.requireVerifiedForCreate(sellerId, neighborhood.getId());
+
     Instant now = Instant.now();
     TradeListing listing = new TradeListing();
     listing.setId(UUID.randomUUID());
@@ -78,7 +106,11 @@ public class ListingService {
     listing.setDescription(request.description() != null ? request.description().trim() : "");
     listing.setFree(request.isFree());
     listing.setPrice(request.isFree() ? 0 : request.price());
-    listing.setNeighborhood(request.neighborhood());
+    listing.setNeighborhoodId(neighborhood.getId());
+    listing.setNeighborhood(
+        request.neighborhood() != null && !request.neighborhood().isBlank()
+            ? request.neighborhood().trim()
+            : neighborhood.getName());
     listing.setLatitude(request.latitude());
     listing.setLongitude(request.longitude());
     listing.setAddress(request.address() != null ? request.address().trim() : null);
@@ -138,6 +170,7 @@ public class ListingService {
           listing.isFree() ? 0 : listing.getPrice(),
           listing.isFree(),
           imagesByListing.getOrDefault(listing.getId(), List.of()),
+          listing.getNeighborhoodId(),
           listing.getNeighborhood() != null ? listing.getNeighborhood() : "",
           listing.getLatitude(),
           listing.getLongitude(),

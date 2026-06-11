@@ -8,14 +8,19 @@ import {
   sendMessage,
   startConversation,
 } from '../../lib/chatApi';
+import {
+  findNeighborhoodForListing,
+  isNeighborhoodVerified,
+} from '../../lib/neighborhoodApi';
 import { useTradeListings } from '../../hooks/useTradeListings';
+import NeighborhoodVerifyModal from '../neighborhood/NeighborhoodVerifyModal';
 import ChatOverlay from '../trade/ChatOverlay';
 import TradeDetailScreen from '../trade/TradeDetailScreen';
 import TradeListingCard from '../trade/TradeListingCard';
 import TradeSellScreen from '../trade/TradeSellScreen';
 import '../trade/Trade.css';
 
-function TradePage({ user, member, onOpenPayoutAccount }) {
+function TradePage({ user, member, neighborhoodState, onOpenPayoutAccount }) {
   const [view, setView] = useState('list');
   const [selectedListing, setSelectedListing] = useState(null);
   const [conversationId, setConversationId] = useState(null);
@@ -29,7 +34,12 @@ function TradePage({ user, member, onOpenPayoutAccount }) {
   const [buyerConversationId, setBuyerConversationId] = useState(null);
   const [buyerPeerName, setBuyerPeerName] = useState('판매자');
   const [buyerChatLoading, setBuyerChatLoading] = useState(false);
-  const { listings, loading, error, addListing, reload } = useTradeListings();
+  const [verifyTarget, setVerifyTarget] = useState(null);
+  const [pendingListing, setPendingListing] = useState(null);
+  const [pendingSell, setPendingSell] = useState(false);
+  const { feedNeighborhoodIds, neighborhoods, verify, activeNeighborhood } =
+    neighborhoodState ?? {};
+  const { listings, loading, error, addListing, reload } = useTradeListings(feedNeighborhoodIds);
 
   useEffect(() => {
     if (view !== 'detail' || !selectedListing?.id || !isApiEnabled()) {
@@ -113,6 +123,60 @@ function TradePage({ user, member, onOpenPayoutAccount }) {
     await addListing(form);
   };
 
+  const isOwnListing = (listing) =>
+    user?.id && listing.sellerId && user.id === listing.sellerId;
+
+  const needsVerification = (listing) => {
+    if (!listing?.neighborhoodId || isOwnListing(listing)) return false;
+    const row = findNeighborhoodForListing(neighborhoods ?? [], listing);
+    if (!row) return true;
+    return !isNeighborhoodVerified(row);
+  };
+
+  const openListingDetail = (listing) => {
+    if (needsVerification(listing)) {
+      const row = findNeighborhoodForListing(neighborhoods ?? [], listing);
+      setPendingSell(false);
+      setVerifyTarget(
+        row ?? {
+          id: null,
+          neighborhoodId: listing.neighborhoodId,
+          neighborhoodName: listing.neighborhood || '이 동네',
+        },
+      );
+      setPendingListing(listing);
+      return;
+    }
+    setSelectedListing(listing);
+    setConversationId(null);
+    setChatError(null);
+    setListingConversations([]);
+    setBuyerConversationId(null);
+    setView('detail');
+  };
+
+  const handleVerifyComplete = async () => {
+    if (!verifyTarget?.id) {
+      throw new Error('동네를 먼저 등록해 주세요.');
+    }
+    await verify(verifyTarget.id);
+    const listing = pendingListing;
+    const sellAfterVerify = pendingSell;
+    setVerifyTarget(null);
+    setPendingListing(null);
+    setPendingSell(false);
+    if (listing) {
+      setSelectedListing(listing);
+      setConversationId(null);
+      setChatError(null);
+      setListingConversations([]);
+      setBuyerConversationId(null);
+      setView('detail');
+    } else if (sellAfterVerify) {
+      setView('sell');
+    }
+  };
+
   const openChatWithConversation = (conv) => {
     setConversationId(conv.id);
     setChatPeerName(conv.peerName || '판매자');
@@ -156,10 +220,23 @@ function TradePage({ user, member, onOpenPayoutAccount }) {
     }
   };
 
+  const openSell = () => {
+    const sellNeighborhood = activeNeighborhood;
+    if (!sellNeighborhood) return;
+    if (!isNeighborhoodVerified(sellNeighborhood)) {
+      setPendingSell(true);
+      setPendingListing(null);
+      setVerifyTarget(sellNeighborhood);
+      return;
+    }
+    setView('sell');
+  };
+
   if (view === 'sell') {
     return (
       <TradeSellScreen
         user={user}
+        sellNeighborhood={activeNeighborhood}
         onClose={() => setView('list')}
         onSubmit={handleSellSubmit}
       />
@@ -233,9 +310,23 @@ function TradePage({ user, member, onOpenPayoutAccount }) {
 
   return (
     <div className="trade-page">
+      <NeighborhoodVerifyModal
+        open={Boolean(verifyTarget)}
+        neighborhood={verifyTarget}
+        onClose={() => {
+          setVerifyTarget(null);
+          setPendingListing(null);
+        }}
+        onVerify={handleVerifyComplete}
+      />
+
       <header className="trade-page__header">
         <h2 className="trade-page__title">거래</h2>
-        <p className="trade-page__desc">동네 물건을 스크롤하며 구경해 보세요.</p>
+        <p className="trade-page__desc">
+          {feedNeighborhoodIds?.length
+            ? '내 동네 물건을 스크롤하며 구경해 보세요. 상세·채팅은 동네 인증이 필요해요.'
+            : '동네를 등록하면 이웃들의 물건이 표시됩니다.'}
+        </p>
       </header>
 
       {error && (
@@ -252,20 +343,17 @@ function TradePage({ user, member, onOpenPayoutAccount }) {
       ) : (
         <ul className="trade-feed" aria-label="거래 물건 목록">
           {listings.length === 0 ? (
-            <li className="trade-feed__empty">등록된 물건이 없습니다.</li>
+            <li className="trade-feed__empty">
+              {feedNeighborhoodIds?.length
+                ? '등록된 물건이 없습니다.'
+                : '상단에서 내 동네를 등록해 주세요.'}
+            </li>
           ) : (
             listings.map((listing) => (
               <li key={listing.id}>
                 <TradeListingCard
                   listing={listing}
-                  onClick={() => {
-                    setSelectedListing(listing);
-                    setConversationId(null);
-                    setChatError(null);
-                    setListingConversations([]);
-                    setBuyerConversationId(null);
-                    setView('detail');
-                  }}
+                  onClick={() => openListingDetail(listing)}
                 />
               </li>
             ))
@@ -276,7 +364,7 @@ function TradePage({ user, member, onOpenPayoutAccount }) {
       <button
         type="button"
         className="trade-fab"
-        onClick={() => setView('sell')}
+        onClick={openSell}
       >
         물건 판매
       </button>

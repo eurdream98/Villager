@@ -10,6 +10,7 @@ public record ListingDto(
     int price,
     boolean isFree,
     List<String> imageUrls,
+    UUID neighborhoodId,
     String neighborhood,
     Double latitude,
     Double longitude,

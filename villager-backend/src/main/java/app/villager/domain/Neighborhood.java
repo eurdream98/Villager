@@ -28,6 +28,15 @@ public class Neighborhood {
   @Column(name = "map_y")
   private BigDecimal mapY;
 
+  @Column(name = "center_lat")
+  private Double centerLat;
+
+  @Column(name = "center_lng")
+  private Double centerLng;
+
+  @Column(name = "verify_radius_m")
+  private Integer verifyRadiusM;
+
   @Column(name = "created_at")
   private Instant createdAt;
 }

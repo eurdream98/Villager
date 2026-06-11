@@ -243,6 +243,12 @@
   cursor: pointer;
 }
 
+.trade-sell__neighborhood-badge {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  color: #52796f;
+}
+
 .trade-sell__title {
   margin: 0;
   flex: 1;

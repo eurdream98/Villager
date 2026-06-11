@@ -11,6 +11,7 @@ function mapListing(row) {
     isFree: row.isFree,
     imageUrls: usableListingImageUrls(row.imageUrls),
     tradeMethods: row.tradeMethods ?? [],
+    neighborhoodId: row.neighborhoodId ?? null,
     neighborhood: row.neighborhood ?? '',
     latitude: row.latitude ?? null,
     longitude: row.longitude ?? null,
@@ -22,8 +23,14 @@ function mapListing(row) {
   };
 }
 
-export async function fetchTradeListingsFromApi() {
-  const data = await apiFetch('/api/v1/listings');
+export async function fetchTradeListingsFromApi(neighborhoodIds) {
+  const params = new URLSearchParams();
+  (neighborhoodIds ?? []).forEach((id) => {
+    if (id) params.append('neighborhoodIds', id);
+  });
+  const qs = params.toString();
+  const path = qs ? `/api/v1/listings?${qs}` : '/api/v1/listings';
+  const data = await apiFetch(path);
   return (data ?? []).map(mapListing);
 }
 
@@ -38,6 +45,7 @@ export async function createTradeListingFromApi(form) {
     description: form.description ?? '',
     isFree: form.isFree,
     price: form.isFree ? 0 : Number(form.price),
+    neighborhoodId: form.neighborhoodId,
     neighborhood: form.neighborhood ?? '',
     latitude: form.latitude ?? null,
     longitude: form.longitude ?? null,
@@ -51,9 +59,9 @@ export async function createTradeListingFromApi(form) {
   return mapListing(data);
 }
 
-export async function fetchTradeListings() {
+export async function fetchTradeListings(neighborhoodIds) {
   if (isApiEnabled()) {
-    return fetchTradeListingsFromApi();
+    return fetchTradeListingsFromApi(neighborhoodIds);
   }
   return fetchTradeListingsSupabase();
 }

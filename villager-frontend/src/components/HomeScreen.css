@@ -17,6 +17,11 @@
   backdrop-filter: blur(8px);
 }
 
+.home__header-start {
+  flex: 1;
+  min-width: 0;
+}
+
 .home__brand {
   margin: 0;
   font-size: 1.15rem;

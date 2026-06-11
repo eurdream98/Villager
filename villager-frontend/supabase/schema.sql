@@ -73,8 +73,33 @@ create table public.neighborhoods (
   slug text not null unique,           -- yeoksam
   map_x numeric(5, 2) default 50,    -- 지도 UI % (0~100)
   map_y numeric(5, 2) default 50,
+  center_lat double precision,
+  center_lng double precision,
+  verify_radius_m integer not null default 2000,
   created_at timestamptz not null default now()
 );
+
+-- 사용자 동네 등록 (최대 2개) + GPS 인증
+create table public.user_neighborhoods (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  neighborhood_id uuid not null references public.neighborhoods (id) on delete restrict,
+  slot smallint not null check (slot in (1, 2)),
+  verified boolean not null default false,
+  verified_at timestamptz,
+  verified_expires_at timestamptz,
+  verified_lat double precision,
+  verified_lng double precision,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (user_id, slot),
+  unique (user_id, neighborhood_id)
+);
+
+create index user_neighborhoods_user_id_idx on public.user_neighborhoods (user_id);
+
+create trigger user_neighborhoods_updated_at before update on public.user_neighborhoods
+  for each row execute function public.set_updated_at();
 
 alter table public.profiles
   add constraint profiles_neighborhood_id_fkey
@@ -330,6 +355,7 @@ alter table public.member_growth enable row level security;
 alter table public.xp_events enable row level security;
 alter table public.neighborhoods enable row level security;
 alter table public.neighborhood_trees enable row level security;
+alter table public.user_neighborhoods enable row level security;
 
 -- profiles: 본인 수정, 전체 읽기(닉네임)
 create policy "profiles_select_all" on public.profiles for select using (true);
@@ -409,6 +435,15 @@ create policy "appointments_update_participant" on public.trade_appointments
 -- neighborhoods / trees: 읽기 공개
 create policy "neighborhoods_select" on public.neighborhoods for select using (true);
 create policy "neighborhood_trees_select" on public.neighborhood_trees for select using (true);
+
+create policy "user_neighborhoods_select_own" on public.user_neighborhoods
+  for select using (user_id = auth.uid());
+create policy "user_neighborhoods_insert_own" on public.user_neighborhoods
+  for insert with check (user_id = auth.uid());
+create policy "user_neighborhoods_update_own" on public.user_neighborhoods
+  for update using (user_id = auth.uid());
+create policy "user_neighborhoods_delete_own" on public.user_neighborhoods
+  for delete using (user_id = auth.uid());
 
 -- member_growth: 본인 읽기
 create policy "member_growth_select_own" on public.member_growth

@@ -13,7 +13,7 @@ const EMPTY_FORM = {
   address: '',
 };
 
-function TradeSellScreen({ user, onClose, onSubmit }) {
+function TradeSellScreen({ user, sellNeighborhood, onClose, onSubmit }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [previews, setPreviews] = useState([]);
   const [error, setError] = useState(null);
@@ -69,6 +69,10 @@ function TradeSellScreen({ user, onClose, onSubmit }) {
       setError('로그인 후 등록할 수 있습니다.');
       return;
     }
+    if (!sellNeighborhood?.neighborhoodId) {
+      setError('판매할 동네를 등록·인증해 주세요.');
+      return;
+    }
     if (!form.isFree && (!form.price || Number(form.price) <= 0)) {
       setError('가격을 입력하거나 무료 나눔을 선택해 주세요.');
       return;
@@ -85,7 +89,8 @@ function TradeSellScreen({ user, onClose, onSubmit }) {
         description: '',
         isFree: form.isFree,
         price: form.isFree ? 0 : form.price,
-        neighborhood: form.neighborhood,
+        neighborhoodId: sellNeighborhood.neighborhoodId,
+        neighborhood: form.neighborhood || sellNeighborhood.neighborhoodName,
         latitude: form.latitude,
         longitude: form.longitude,
         address: form.address,
@@ -109,9 +114,19 @@ function TradeSellScreen({ user, onClose, onSubmit }) {
         <h2 id="trade-sell-title" className="trade-sell__title">
           물건 판매
         </h2>
+        {sellNeighborhood?.neighborhoodName && (
+          <p className="trade-sell__neighborhood-badge">
+            {sellNeighborhood.neighborhoodName} 동네에 등록
+          </p>
+        )}
       </header>
 
       <form className="trade-sell__form" onSubmit={handleSubmit}>
+        {sellNeighborhood?.neighborhoodName && (
+          <p className="trade-sell__neighborhood-badge">
+            판매 동네: <strong>{sellNeighborhood.neighborhoodName}</strong>
+          </p>
+        )}
         <section className="trade-sell__section">
           <h3 className="trade-sell__label">사진</h3>
           <div className="trade-sell__photos">

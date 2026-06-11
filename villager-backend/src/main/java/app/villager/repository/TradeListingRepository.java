@@ -11,5 +11,8 @@ public interface TradeListingRepository extends JpaRepository<TradeListing, UUID
 
   List<TradeListing> findByStatusOrderByCreatedAtDesc(ListingStatus status);
 
+  List<TradeListing> findByStatusAndNeighborhoodIdInOrderByCreatedAtDesc(
+      ListingStatus status, List<UUID> neighborhoodIds);
+
   Optional<TradeListing> findByIdAndStatus(UUID id, ListingStatus status);
 }

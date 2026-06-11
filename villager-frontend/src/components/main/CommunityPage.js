@@ -6,7 +6,7 @@ import { fetchGroupBuys } from '../../lib/groupBuyApi';
 import '../community/GroupBuy.css';
 import './TabPages.css';
 
-function CommunityPage({ user, member }) {
+function CommunityPage({ user, member, neighborhoodState }) {
   const [view, setView] = useState('feed');
   const [selectedId, setSelectedId] = useState(null);
   const [items, setItems] = useState([]);
@@ -72,7 +72,14 @@ function CommunityPage({ user, member }) {
           <button
             type="button"
             className="group-buy-create-btn"
-            onClick={() => setView('create')}
+            onClick={() => {
+              const active = neighborhoodState?.activeNeighborhood;
+              if (!active || !neighborhoodState?.isNeighborhoodVerified(active)) {
+                window.alert('공동구매 등록은 동네 인증 후 가능합니다. 상단 「동네 설정」에서 인증해 주세요.');
+                return;
+              }
+              setView('create');
+            }}
           >
             + 공동구매
           </button>

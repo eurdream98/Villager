@@ -11,15 +11,18 @@
 -- ---------------------------------------------------------------------------
 -- 동네 · 동네 나무 (인증 불필요, 여러 번 실행 가능)
 -- ---------------------------------------------------------------------------
-insert into public.neighborhoods (id, name, slug, map_x, map_y)
+insert into public.neighborhoods (id, name, slug, map_x, map_y, center_lat, center_lng, verify_radius_m)
 values
-  ('a1111111-1111-1111-1111-111111111111', '역삼동', 'yeoksam', 62, 38),
-  ('a2222222-2222-2222-2222-222222222222', '망원동', 'mangwon', 28, 52),
-  ('a3333333-3333-3333-3333-333333333333', '성수동', 'seongsu', 72, 58)
+  ('a1111111-1111-1111-1111-111111111111', '역삼동', 'yeoksam', 62, 38, 37.5009, 127.0366, 2000),
+  ('a2222222-2222-2222-2222-222222222222', '망원동', 'mangwon', 28, 52, 37.5563, 126.9100, 2000),
+  ('a3333333-3333-3333-3333-333333333333', '성수동', 'seongsu', 72, 58, 37.5445, 127.0559, 2000)
 on conflict (slug) do update set
   name = excluded.name,
   map_x = excluded.map_x,
-  map_y = excluded.map_y;
+  map_y = excluded.map_y,
+  center_lat = excluded.center_lat,
+  center_lng = excluded.center_lng,
+  verify_radius_m = excluded.verify_radius_m;
 
 insert into public.neighborhood_trees (neighborhood_id, total_xp)
 select n.id, v.total_xp
@@ -84,12 +87,13 @@ begin
   );
 
   insert into public.trade_listings (
-    id, seller_id, neighborhood, title, description, price, is_free, status
+    id, seller_id, neighborhood_id, neighborhood, title, description, price, is_free, status
   )
   values
     (
       v_listing1,
       v_seller_id,
+      'a1111111-1111-1111-1111-111111111111',
       '역삼동',
       '아이패드 미니 6세대 64GB',
       '생활기스 약간 있습니다. 직거래·택배 모두 가능해요.',
@@ -100,6 +104,7 @@ begin
     (
       v_listing2,
       v_seller_id,
+      'a1111111-1111-1111-1111-111111111111',
       '역삼동',
       '무선 키보드 (로지텍)',
       '거의 새 제품입니다. 나눔도 환영해요.',
@@ -110,6 +115,7 @@ begin
     (
       v_listing3,
       v_seller_id,
+      'a2222222-2222-2222-2222-222222222222',
       '망원동',
       '캠핑 의자 2개',
       '접이식 의자 2개 세트입니다.',
@@ -122,6 +128,7 @@ begin
     description = excluded.description,
     price = excluded.price,
     is_free = excluded.is_free,
+    neighborhood_id = excluded.neighborhood_id,
     neighborhood = excluded.neighborhood,
     updated_at = now();
 
