@@ -284,4 +284,13 @@ public class NeighborhoodService {
         neighborhood.getCenterLng(),
         neighborhood.getVerifyRadiusM());
   }
+
+  @Transactional
+  public NeighborhoodDto resolve(String name,Double lat,Double lng){
+    if(name == null || name.trim().isEmpty()){
+      throw new BusinessException(HttpStatus.BAD_REQUEST, "동네 이름을 입력해주세요.");
+    }
+    Neighborhood neighborhood = findOrCreate(name.trim(),lat,lng);
+    return toNeighborhoodDto(neighborhood);
+  }
 }

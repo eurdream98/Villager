@@ -34,6 +34,8 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/v1/neighborhoods/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
             .requestMatchers("/ws/**").permitAll()
+            .requestMatchers(HttpMethod.GET,"/api/v1/neighborhoods/**").permitAll()
+            .requestMatchers(HttpMethod.POST,"/api/v1/neighborhoods/resolve").permitAll()
             .anyRequest().authenticated())
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 

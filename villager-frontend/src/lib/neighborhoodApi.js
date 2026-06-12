@@ -13,6 +13,16 @@ export function mapUserNeighborhood(row) {
   };
 }
 
+export function mapNeighborhood(row){
+  return{
+    id:row.id,
+    name:row.name??'',
+    slug:row.slug??'',
+    centerLat:row.centerLat??null,
+    centerLng:row.centerLng??null,
+  }
+}
+
 export async function fetchUserNeighborhoods() {
   const data = await apiFetch('/api/v1/me/neighborhoods');
   return (data ?? []).map(mapUserNeighborhood);
@@ -32,6 +42,14 @@ export async function verifyUserNeighborhood(id, { latitude, longitude, detected
     body: JSON.stringify({ latitude, longitude, detectedNeighborhoodName }),
   });
   return mapUserNeighborhood(data);
+}
+
+export async function resolveNeighborhood({name,latitude,longitude}){
+  const data = await apiFetch('/api/v1/neighborhoods/resolve',{
+    method:'POST',
+    body:JSON.stringify({name,latitude,logitude}),
+  });
+  return mapNeighborhood(data);
 }
 
 /** GPS + 역지오코딩으로 동네 인증 */
